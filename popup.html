@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClearURL</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <div class="logo">
+        <img src="icons/icon32.png" alt="ClearURL" onerror="this.style.display='none'">
+        <h1>ClearURL</h1>
+      </div>
+      <div class="toggle-container">
+        <label class="toggle">
+          <input type="checkbox" id="enableToggle">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </header>
+
+    <div class="stats-section">
+      <div class="stat-card">
+        <div class="stat-number" id="totalCleaned">0</div>
+        <div class="stat-label">URLs Cleaned</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number" id="parametersRemoved">0</div>
+        <div class="stat-label">Parameters Removed</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <h3>Recent Activity</h3>
+      <div class="activity-list" id="activityList">
+        <div class="no-activity">No recent activity</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="clearStats" class="action-btn secondary">
+        Clear Statistics
+      </button>
+      <button id="openOptions" class="action-btn primary">
+        Settings
+      </button>
+    </div>
+
+    <div class="current-site">
+      <div class="site-info">
+        <span class="site-url" id="currentSite">example.com</span>
+        <button id="whitelistBtn" class="whitelist-btn">
+          <span class="whitelist-text">Add to Whitelist</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

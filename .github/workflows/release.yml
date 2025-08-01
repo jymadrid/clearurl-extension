@@ -1,0 +1,77 @@
+name: Release
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run tests
+      run: npm run validate
+      
+    - name: Build extension
+      run: npm run package
+      
+    - name: Extract version
+      id: version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Create Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version.outputs.VERSION }}
+        release_name: ClearURL ${{ steps.version.outputs.VERSION }}
+        body: |
+          ## What's Changed
+          
+          See [CHANGELOG.md](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed changes.
+          
+          ## Installation
+          
+          ### Chrome Web Store
+          - Install from the [Chrome Web Store](https://chrome.google.com/webstore/detail/clearurl/YOUR-EXTENSION-ID)
+          
+          ### Firefox Add-ons
+          - Install from [Firefox Add-ons](https://addons.mozilla.org/firefox/addon/clearurl/)
+          
+          ### Manual Installation
+          1. Download the `clearurl-extension.zip` file below
+          2. Extract the contents
+          3. Load the extension in developer mode
+          
+          ## Verification
+          
+          **SHA256 Checksums:**
+          ```
+          clearurl-extension.zip: $(sha256sum web-ext-artifacts/*.zip | cut -d' ' -f1)
+          ```
+        draft: false
+        prerelease: false
+        
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./web-ext-artifacts/clearurl_extension-${{ steps.version.outputs.VERSION }}.zip
+        asset_name: clearurl-extension.zip
+        asset_content_type: application/zip

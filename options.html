@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ClearURL Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="logo">
+        <img src="icons/icon48.png" alt="ClearURL" onerror="this.style.display='none'">
+        <h1>ClearURL Settings</h1>
+      </div>
+      <div class="version">v1.0.0</div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="general">General</button>
+      <button class="tab-btn" data-tab="rules">Rules</button>
+      <button class="tab-btn" data-tab="whitelist">Whitelist</button>
+      <button class="tab-btn" data-tab="stats">Statistics</button>
+    </nav>
+
+    <main class="content">
+      <div class="tab-content active" id="general">
+        <div class="section">
+          <h2>General Settings</h2>
+          
+          <div class="setting-group">
+            <label class="setting-label">
+              <input type="checkbox" id="extensionEnabled">
+              <span class="checkmark"></span>
+              Enable ClearURL Extension
+            </label>
+            <p class="setting-description">
+              When enabled, ClearURL will automatically remove tracking parameters from URLs.
+            </p>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label">
+              <input type="checkbox" id="showNotifications">
+              <span class="checkmark"></span>
+              Show Badge Notifications
+            </label>
+            <p class="setting-description">
+              Display a badge on the extension icon showing the number of cleaned URLs.
+            </p>
+          </div>
+
+          <div class="setting-group">
+            <label class="setting-label">
+              <input type="checkbox" id="logActivity">
+              <span class="checkmark"></span>
+              Log Cleaning Activity
+            </label>
+            <p class="setting-description">
+              Keep a history of cleaned URLs for viewing in the popup.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="rules">
+        <div class="section">
+          <h2>Tracking Parameter Rules</h2>
+          <p class="section-description">
+            Manage which tracking parameters should be removed from URLs.
+          </p>
+
+          <div class="rules-container">
+            <div class="rules-header">
+              <h3>Built-in Rules</h3>
+              <button id="resetRules" class="btn secondary">Reset to Default</button>
+            </div>
+            
+            <div class="rules-list" id="builtinRules">
+              <!-- Built-in rules will be populated here -->
+            </div>
+
+            <div class="custom-rules-section">
+              <h3>Custom Rules</h3>
+              <div class="add-rule">
+                <input type="text" id="newRuleInput" placeholder="Enter tracking parameter (e.g., utm_custom)">
+                <button id="addRule" class="btn primary">Add Rule</button>
+              </div>
+              <div class="rules-list" id="customRules">
+                <!-- Custom rules will be populated here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="whitelist">
+        <div class="section">
+          <h2>Whitelisted Sites</h2>
+          <p class="section-description">
+            Sites on this list will not have their URLs cleaned.
+          </p>
+
+          <div class="whitelist-container">
+            <div class="add-whitelist">
+              <input type="text" id="newWhitelistInput" placeholder="Enter domain (e.g., example.com)">
+              <button id="addWhitelist" class="btn primary">Add Site</button>
+            </div>
+            
+            <div class="whitelist-list" id="whitelistList">
+              <!-- Whitelist items will be populated here -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tab-content" id="stats">
+        <div class="section">
+          <h2>Statistics</h2>
+          
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-value" id="totalCleanedStat">0</div>
+              <div class="stat-label">Total URLs Cleaned</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="parametersRemovedStat">0</div>
+              <div class="stat-label">Parameters Removed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-value" id="sessionsCleanedStat">0</div>
+              <div class="stat-label">Sessions Protected</div>
+            </div>
+          </div>
+
+          <div class="recent-activity">
+            <h3>Recent Activity</h3>
+            <div class="activity-log" id="activityLog">
+              <!-- Activity log will be populated here -->
+            </div>
+          </div>
+
+          <div class="stats-actions">
+            <button id="exportStats" class="btn secondary">Export Data</button>
+            <button id="clearAllStats" class="btn danger">Clear All Statistics</button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-links">
+        <a href="https://github.com/jymadrid/clearurl-extension" target="_blank">GitHub</a>
+        <a href="#" id="reportIssue">Report Issue</a>
+        <a href="#" id="showHelp">Help</a>
+      </div>
+      <div class="footer-text">
+        Made with ❤️ for privacy protection
+      </div>
+    </footer>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

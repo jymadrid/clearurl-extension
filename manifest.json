@@ -1,0 +1,52 @@
+{
+  "manifest_version": 3,
+  "name": "ClearURL: Privacy Link Purifier",
+  "version": "1.0.0",
+  "description": "🛡️ Revolutionary privacy warfare extension - Deploy military-grade URL sanitization to obliterate tracking surveillance",
+  
+  "permissions": [
+    "declarativeNetRequest",
+    "storage",
+    "activeTab",
+    "tabs",
+    "webNavigation"
+  ],
+  
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ClearURL: Privacy Link Purifier",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  
+  "options_page": "options.html",
+  
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "tracking_rules",
+        "enabled": true,
+        "path": "rules.json"
+      }
+    ]
+  }
+}
