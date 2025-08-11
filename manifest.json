@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "ClearURL: Privacy Link Purifier",
   "version": "1.0.0",
-  "description": "🛡️ Revolutionary privacy warfare extension - Deploy military-grade URL sanitization to obliterate tracking surveillance",
+  "description": "Privacy-focused URL cleaner that automatically removes tracking parameters to enhance your browsing privacy",
   
   "permissions": [
     "declarativeNetRequest",

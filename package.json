@@ -1,7 +1,7 @@
 {
   "name": "clearurl-extension",
   "version": "1.0.0",
-  "description": "Revolutionary privacy warfare extension - Deploy military-grade URL sanitization to obliterate tracking surveillance at the network protocol level",
+  "description": "Privacy-focused browser extension that automatically removes tracking parameters from URLs to enhance user privacy",
   "main": "background.js",
   "scripts": {
     "dev": "web-ext run",
@@ -16,15 +16,15 @@
     "start": "web-ext run --start-url about:debugging"
   },
   "keywords": [
-    "privacy-warfare",
-    "surveillance-countermeasures", 
-    "network-security",
-    "tracking-obliteration",
-    "digital-counterintelligence",
+    "privacy",
+    "security", 
+    "browser-extension",
+    "tracking-protection",
+    "url-cleaner",
     "chrome-extension",
-    "privacy-shield",
-    "url-sanitization",
-    "military-grade-privacy"
+    "privacy-tools",
+    "anti-tracking",
+    "web-privacy"
   ],
   "author": {
     "name": "jymadrid",

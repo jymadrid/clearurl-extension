@@ -1,53 +1,55 @@
-# ClearURL: Privacy Link Purifier
+# ClearURL: Privacy-Focused URL Cleaner
 
-**🛡️ Reclaim your digital freedom. Eliminate surveillance. Browse invisibly.**
+A lightweight browser extension that automatically removes tracking parameters from URLs to enhance your privacy while browsing.
 
-ClearURL is a cutting-edge, militarily-precise browser extension that weaponizes advanced network interception to obliterate tracking mechanisms at the protocol level, creating an impenetrable privacy shield for the modern digital warrior.
+ClearURL is an open-source Chrome extension that helps protect user privacy by automatically removing tracking parameters from URLs. Built with modern web standards and designed for performance, it operates transparently in the background to clean URLs without impacting browsing experience.
 
-## 🎯 Mission: Digital Liberation
+## 🎯 Purpose
 
-In the hyper-connected surveillance economy, every digital footprint becomes ammunition for corporate data harvesting. ClearURL deploys military-grade URL sanitization algorithms to systematically dismantle the tracking infrastructure that follows your every move. This isn't just privacy protection—it's digital counterintelligence.
+Online tracking has become increasingly sophisticated, with companies embedding tracking parameters in URLs to monitor user behavior across websites. ClearURL addresses this privacy concern by automatically identifying and removing these parameters, helping users maintain better privacy without manual intervention.
 
-## ⚡ Revolutionary Architecture
+## ⚡ Technical Architecture
 
-ClearURL harnesses Chrome's bleeding-edge `declarativeNetRequest` API to execute sub-millisecond URL interception at the network layer—operating faster than traditional JavaScript-based solutions while maintaining zero memory footprint. This represents a paradigm shift in privacy engineering.
+ClearURL leverages Chrome's modern `declarativeNetRequest` API for efficient URL processing at the network layer. This approach provides better performance compared to traditional JavaScript-based solutions while maintaining a minimal memory footprint.
 
-## 🧠 Advanced Intelligence Suite
+## 🚀 Key Features
 
-### 🎯 **Quantum-Speed Threat Neutralization**
-- Deploys microsecond-precision network interception using Chrome's declarativeNetRequest API
-- Executes zero-latency URL sanitization that outperforms legacy JavaScript approaches by 1000x
-- Implements predictive parameter identification with machine-learning accuracy
+### 🎯 **Automatic URL Cleaning**
+- Real-time parameter removal using Chrome's declarativeNetRequest API
+- Zero-latency processing with minimal performance impact
+- Smart parameter detection with comprehensive rule coverage
 
-### 📊 **Real-Time Surveillance Analytics**  
-- Live threat visualization with millisecond-accurate activity tracking
-- Advanced behavioral analytics showing quantified protection metrics
-- Forensic-grade logging system for comprehensive privacy auditing
+### 📊 **Privacy Analytics**  
+- Activity tracking with transparent statistics
+- Recent cleanup history for user awareness
+- Quantified protection metrics to understand privacy improvements
 
-### ⚙️ **Tactical Configuration Management**
-- Military-grade rule engine with custom threat signature creation
-- Advanced whitelist protocols for surgical precision control
-- Zero-configuration deployment with intelligent auto-optimization
+### ⚙️ **Flexible Configuration**
+- Customizable rule engine for advanced users
+- Whitelist functionality for site-specific exceptions
+- Easy toggle controls for quick activation/deactivation
 
-### 🏠 **Strategic Site Command**
-- Granular per-domain tactical control systems
-- One-click stealth mode activation for specific environments
-- Global kill-switch capability for instant operational security
+### 🏠 **Site Management**
+- Per-domain control for granular privacy settings
+- One-click site exemptions for trusted domains
+- Global controls with site-specific overrides
 
-### 🔔 **Covert Operations Interface**
-- Silent notification system with encrypted status indicators  
-- Invisible protection confirmation through advanced badge cryptography
-- Undetectable privacy enhancement with zero user friction
+### 🔔 **User Feedback**
+- Optional notification system for transparency
+- Badge indicators showing cleanup activity
+- Unobtrusive privacy protection with minimal interface
 
-## 🚀 Deployment Protocols
+## 🚀 Installation
 
-### 🏪 **Elite Distribution Channel**
-1. Access the Chrome Web Store's premium security section
-2. Deploy with enterprise-grade permissions
-3. Activate advanced threat protection immediately
-4. Begin invisible digital warfare against surveillance capitalism
+### 📦 **Chrome Web Store**
+1. Visit the Chrome Web Store (coming soon)
+2. Click "Add to Chrome" 
+3. Confirm permissions when prompted
+4. The extension icon will appear in your browser toolbar
 
-### 🔧 **Advanced Tactical Installation (Black Ops Mode)**
+### 🔧 **Development Installation**
+For developers or advanced users who want to install from source:
+
 1. Clone this repository:
    ```bash
    git clone https://github.com/jymadrid/clearurl-extension.git
@@ -62,157 +64,225 @@ ClearURL harnesses Chrome's bleeding-edge `declarativeNetRequest` API to execute
 
 5. The extension should now appear in your extensions list
 
-## 🏗️ Revolutionary Technical Foundation
+## 🏗️ Technical Implementation
 
-### **Next-Generation Technologies**
-- **JavaScript (ES2022+)** - Cutting-edge language features with async/await mastery
-- **Chrome Extension Manifest V3** - Latest security-hardened extension platform
-- **declarativeNetRequest API** - Military-grade network interception technology
-- **Chrome Storage API** - Encrypted local data persistence with sync capabilities
+### **Core Technologies**
+- **JavaScript (ES2022+)** - Modern language features with async/await
+- **Chrome Extension Manifest V3** - Latest extension platform standards
+- **declarativeNetRequest API** - Efficient network-level URL processing
+- **Chrome Storage API** - Persistent settings and statistics storage
 
-### **Architectural Excellence**
-Our multi-layered defense system employs:
+### **Architecture Overview**
+The extension uses a modular architecture with clear separation of concerns:
 
-#### **🎯 Elite Service Worker Core (`background.js`)**
-- Autonomous threat detection and neutralization engine
-- Advanced statistical warfare analytics
-- Encrypted communication protocols for UI components
-- Real-time behavioral pattern analysis
+#### **🎯 Service Worker (`background.js`)**
+- Handles URL processing and cleanup logic
+- Manages extension statistics and user preferences
+- Provides messaging interface for UI components
+- Implements rule-based parameter detection
 
-#### **💻 Tactical Command Interface (`popup.html/js/css`)**
-- Mission-critical statistics visualization  
-- Live operational activity monitoring
-- Rapid-deployment configuration controls
-- Stealth-mode activation systems
+#### **💻 Popup Interface (`popup.html/js/css`)**
+- Displays real-time privacy statistics
+- Provides quick access to extension controls
+- Shows recent cleanup activity
+- Offers one-click site management
 
-#### **⚙️ Strategic Operations Center (`options.html/js/css`)**
-- Comprehensive campaign management dashboard
-- Advanced threat signature configuration
-- Intelligence gathering and data export protocols
-- Deep-system behavioral modification controls
+#### **⚙️ Options Page (`options.html/js/css`)**
+- Comprehensive settings management
+- Advanced rule configuration
+- Whitelist management interface
+- Data export and import capabilities
 
-#### **📋 Precision Strike Configuration (`rules.json`)**
-- Declarative warfare rules for maximum efficiency
-- Regex-powered pattern recognition algorithms  
-- Optimized for zero-latency performance at scale
+#### **📋 Rule Configuration (`rules.json`)**
+- Declarative rules for network request processing
+- Optimized regex patterns for parameter matching
+- Designed for performance and maintainability
 
-## 🎯 Advanced Threat Intelligence Database
+## 🎯 Supported Tracking Parameters
 
-ClearURL's proprietary threat detection engine neutralizes **50+ surveillance mechanisms** across the digital battlefield:
+ClearURL automatically removes over 50 common tracking parameters from URLs:
 
-### **🔍 Corporate Surveillance Giants**
-- **Google Analytics Arsenal**: `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `utm_id`
-- **Google Ads Weaponry**: `gclid`, `gad_source`, `gbraid`, `wbraid` - *Advanced click tracking obliteration*
+### **🔍 Analytics Platforms**
+- **Google Analytics**: `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `utm_id`
+- **Google Ads**: `gclid`, `gad_source`, `gbraid`, `wbraid` - *Click tracking parameters*
 
-### **📱 Social Media Espionage Networks**
-- **Facebook Intelligence**: `fbclid` - *Social graph infiltration prevention*
-- **Instagram Operations**: `igshid` - *Story tracking countermeasures*  
-- **Twitter Surveillance**: `twclid` - *Tweet engagement pattern disruption*
-- **Microsoft Ecosystem**: `msclkid` - *Enterprise tracking neutralization*
+### **📱 Social Media Platforms**
+- **Facebook**: `fbclid` - *Facebook click identifier*
+- **Instagram**: `igshid` - *Instagram share identifier*  
+- **Twitter**: `twclid` - *Twitter click tracking*
+- **Microsoft**: `msclkid` - *Microsoft advertising click tracking*
 
-### **🎮 Advanced Marketing Warfare**
-- **Real-Time Analytics**: `_ga`, `_gl` - *Google Analytics behavioral profiling destruction*
-- **HubSpot Intelligence Suite**: `_hsenc`, `_hsmi`, `hsCtaTracking`, `hsa_*` - *Complete CRM tracking annihilation*
-- **Piwik/Matomo Systems**: `pk_*`, `piwik_*` - *Open-source analytics sterilization*
-- **Enterprise Solutions**: *50+ additional corporate tracking mechanisms*
+### **🎮 Marketing & Analytics Tools**
+- **Google Analytics Enhanced**: `_ga`, `_gl` - *Client and link tracking*
+- **HubSpot**: `_hsenc`, `_hsmi`, `hsCtaTracking`, `hsa_*` - *HubSpot tracking suite*
+- **Piwik/Matomo**: `pk_*`, `piwik_*` - *Open-source analytics tracking*
+- **Email Marketing**: Various campaign and source tracking parameters
 
-*[Advanced threat signature database with continuous updates]*
+*For a complete list of supported parameters, see [background.js:107-120](background.js#L107-L120)*
 
-[View complete list](background.js#L45-L60)
+## ⚙️ Usage & Configuration
 
-## ⚙️ Advanced Command & Control
+### **🎛️ Main Controls**
+- **Extension Toggle**: Enable/disable URL cleaning globally
+- **Statistics Display**: View real-time cleaning activity and metrics  
+- **Recent Activity**: See recently cleaned URLs and removed parameters
 
-### **🎛️ Strategic Operations Hub**
-- **Master Control**: Global threat detection activation/deactivation
-- **Intelligence Badges**: Real-time surveillance threat quantification  
-- **Operational Logging**: Forensic-grade activity tracking and analysis
+### **🛡️ Site Management**
+- **Whitelist Control**: Add trusted sites that should be exempted from cleaning
+- **Per-Domain Settings**: Configure cleaning behavior for specific websites
+- **Quick Toggle**: Easily enable/disable cleaning for the current site
 
-### **🛡️ Tactical Rule Warfare**
-- **Built-in Arsenal**: Elite-tier threat signature management
-- **Custom Weaponry**: Deploy user-defined threat detection algorithms
-- **Smart Reset Protocols**: Instant restoration to optimal security configurations
+### **🏴 Advanced Options**
+- **Custom Rules**: Define additional tracking parameters to remove
+- **Export/Import**: Backup and restore extension settings
+- **Statistics Reset**: Clear accumulated usage data
 
-### **🏴 Stealth Site Operations**
-- **Selective Engagement**: Precision per-domain tactical control
-- **Rapid Deployment**: One-click site-specific protection activation
-- **Advanced Filtering**: Surgical exemption protocols for mission-critical sites
+## 🔒 Privacy & Security
 
-## 🔒 Fortress-Level Security Architecture
+### **🛡️ Privacy-First Design**
+ClearURL is built with privacy as the core principle:
+- **🚫 No External Communication** - All processing happens locally on your device
+- **🔐 Local Data Storage** - Statistics and settings stored securely in your browser  
+- **👻 Transparent Operation** - No hidden data collection or transmission
+- **🕵️ Minimal Permissions** - Only requests necessary browser permissions
 
-### **🛡️ Zero-Trust Privacy Protocol**
-ClearURL operates on revolutionary **air-gapped** principles:
-- **🚫 Zero External Communications** - No data ever leaves your digital fortress
-- **🔐 Military-Grade Local Encryption** - All statistics secured with advanced cryptography  
-- **👻 Ghost-Mode Operations** - Completely invisible to behavioral analysis systems
-- **🕵️ Counter-Intelligence Design** - Built to defeat even advanced tracking methodologies
+### **🔑 Required Permissions**
+- **`declarativeNetRequest`**: Process and clean URLs at the network level
+- **`storage`**: Save user preferences and statistics locally
+- **`activeTab`**: Access current page information for site-specific controls
+- **`<all_urls>`**: Monitor and clean URLs across all websites
 
-### **🔑 Minimal Attack Surface**
-- **`declarativeNetRequest`**: Precision URL interception with surgical accuracy
-- **`storage`**: Encrypted local data vaults with sync-grade security
-- **`activeTab`**: Strategic current-page intelligence gathering
-- **`<all_urls>`**: Universal protection deployment across all digital territories
-
-*Every permission justified. Every access controlled. Every operation secured.*
+*Each permission serves a specific privacy protection function and is essential for the extension's operation.*
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Here's how you can help:
+We welcome contributions from developers, privacy advocates, and users who want to help improve online privacy. There are many ways to contribute:
 
-### Reporting Issues
-1. Check existing issues on GitHub
-2. Create detailed bug reports with:
-   - Browser version and OS
-   - Steps to reproduce
+### 🐛 Reporting Issues
+1. Check [existing issues](https://github.com/jymadrid/clearurl-extension/issues) first
+2. Create detailed bug reports including:
+   - Browser version and operating system
+   - Steps to reproduce the issue
    - Expected vs actual behavior
-   - Screenshots if applicable
+   - Screenshots or error messages if applicable
 
-### Adding New Tracking Parameters
-1. Research the parameter and its usage
-2. Test the parameter removal doesn't break functionality
+### 📝 Improving Documentation
+- Help translate the extension to other languages
+- Improve README documentation and examples
+- Add educational content about online privacy
+- Create user guides and tutorials
+
+### 🔧 Adding New Tracking Parameters
+1. Research the parameter and document its purpose
+2. Test that removing it doesn't break website functionality
 3. Submit a pull request with:
    - Parameter name and description
-   - Source/documentation reference
-   - Test cases
+   - Documentation or source references
+   - Test cases demonstrating the change
 
-### Code Contributions
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes with tests
-4. Submit a pull request with detailed description
+### 💻 Code Contributions
+1. Fork the repository and create a feature branch
+2. Make your changes with appropriate tests
+3. Follow the existing code style and conventions
+4. Submit a pull request with a detailed description
 
-## 📈 Roadmap
+### 🧪 Testing & Quality Assurance
+- Test the extension on different websites
+- Report compatibility issues
+- Help with performance testing
+- Contribute to automated testing efforts
 
-### Version 1.1
-- [ ] Firefox support
-- [ ] Import/export settings
-- [ ] Advanced regex rules
-- [ ] Performance metrics
+### Development Setup
 
-### Version 1.2
-- [ ] Rule sharing community
-- [ ] Automatic rule updates
-- [ ] Integration with privacy tools
-- [ ] Mobile browser support
+```bash
+# Clone the repository
+git clone https://github.com/jymadrid/clearurl-extension.git
+cd clearurl-extension
+
+# Install development dependencies
+npm install
+
+# Run tests
+npm test
+
+# Run linting
+npm run lint
+
+# Build for production
+npm run build
+```
+
+## 📈 Development Roadmap
+
+We're committed to continuously improving ClearURL based on community feedback and evolving privacy needs.
+
+### Version 1.1.0 - Enhanced Functionality
+- [ ] **Firefox Compatibility** - Extend support to Firefox users
+- [ ] **Settings Import/Export** - Backup and restore configuration
+- [ ] **Advanced Regex Rules** - User-defined custom tracking parameters
+- [ ] **Performance Dashboard** - Detailed metrics and impact analysis
+- [ ] **Bulk Whitelist Management** - Import/export whitelist configurations
+
+### Version 1.2.0 - Community Features
+- [ ] **Rule Sharing Platform** - Community-contributed tracking parameter definitions
+- [ ] **Automatic Rule Updates** - Keep up with new tracking methods automatically
+- [ ] **Privacy Tool Integration** - Work seamlessly with other privacy extensions
+- [ ] **Mobile Browser Support** - Extend to mobile browsing platforms
+- [ ] **Educational Content** - In-app privacy education and tips
+
+### Version 2.0.0 - Advanced Privacy Features
+- [ ] **AI-Powered Detection** - Machine learning for new tracking pattern recognition
+- [ ] **Network Analysis** - Deep inspection of tracking behavior patterns
+- [ ] **Privacy Score** - Quantified privacy protection metrics
+- [ ] **Integration APIs** - Allow other privacy tools to leverage ClearURL
+
+### Community Priorities
+We regularly review community feedback to prioritize development. Popular requests include:
+- Better visualization of cleaned URLs
+- Integration with password managers
+- Corporate deployment features
+- Advanced logging and auditing
+
+*Have a feature request? [Open an issue](https://github.com/jymadrid/clearurl-extension/issues) and let's discuss it!*
 
 ## 📝 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
+The MIT License ensures this project remains open source and free for everyone to use, modify, and distribute.
+
 ## 🙏 Acknowledgments
 
-- Chrome Extension documentation and community
-- Privacy advocates and researchers
-- Open source contributors
-- Users who help test and improve the extension
+ClearURL is built with appreciation for:
 
-## 📞 Support
+- **Chrome Extension APIs** - Google's comprehensive extension platform
+- **Privacy Research Community** - Researchers who identify and document tracking methods
+- **Open Source Contributors** - Developers who contribute code, documentation, and feedback
+- **Privacy Advocates** - Users who help test and improve the extension
+- **Web Standards Groups** - Organizations working to improve web privacy standards
 
-- **GitHub Issues**: [Report bugs and request features](https://github.com/jymadrid/clearurl-extension/issues)
-- **Discussions**: [Community discussions and Q&A](https://github.com/jymadrid/clearurl-extension/discussions)
-- **Documentation**: [Extension documentation and guides](https://github.com/jymadrid/clearurl-extension/wiki)
+## 📞 Support & Community
+
+### Getting Help
+- **📖 Documentation**: [Extension wiki and guides](https://github.com/jymadrid/clearurl-extension/wiki)
+- **🐛 Bug Reports**: [GitHub Issues](https://github.com/jymadrid/clearurl-extension/issues)
+- **💬 Discussions**: [Community Q&A](https://github.com/jymadrid/clearurl-extension/discussions)
+- **📧 Contact**: For security issues, email jymadrid@protonmail.com
+
+### Community Guidelines
+We're committed to maintaining a welcoming, inclusive community:
+- Be respectful and constructive in discussions
+- Focus on technical merit and user benefit
+- Help newcomers learn about privacy protection
+- Collaborate openly and share knowledge
+
+### Security & Privacy Issues
+If you discover a security vulnerability, please report it privately to jymadrid@protonmail.com rather than opening a public issue.
 
 ---
 
-**Made with ❤️ for privacy protection**
+**Built with ❤️ for digital privacy**
 
-*Restore control over your digital privacy, one URL at a time.*
+*Helping users take control of their online privacy, one URL at a time.*
+
+**Stars ⭐ and contributions are greatly appreciated!**
