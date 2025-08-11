@@ -112,6 +112,20 @@ class OptionsManager {
       this.exportStats();
     });
 
+    document.getElementById('importStats').addEventListener('click', () => {
+      this.importStats();
+    });
+
+    document.getElementById('testUrlBtn').addEventListener('click', () => {
+      this.testUrlCleaning();
+    });
+
+    document.getElementById('testUrlInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        this.testUrlCleaning();
+      }
+    });
+
     document.getElementById('clearAllStats').addEventListener('click', () => {
       this.clearAllStats();
     });
@@ -314,7 +328,8 @@ class OptionsManager {
       recentCleanups: this.recentCleanups,
       whitelist: this.whitelist,
       customRules: this.settings.customRules,
-      exportDate: new Date().toISOString()
+      exportDate: new Date().toISOString(),
+      extensionVersion: chrome.runtime.getManifest().version
     };
     
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -324,6 +339,187 @@ class OptionsManager {
     a.download = `clearurl-data-${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  async importStats() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        
+        // Validate data structure
+        if (!this.validateImportData(data)) {
+          throw new Error('Invalid data format');
+        }
+        
+        // Confirm import
+        const confirmMsg = `Import data from ${data.exportDate || 'unknown date'}?\n\nThis will merge with your current settings:\n- ${data.customRules?.length || 0} custom rules\n- ${data.whitelist?.length || 0} whitelisted domains\n- Statistics from ${data.stats?.totalCleaned || 0} cleanups`;
+        
+        if (!confirm(confirmMsg)) return;
+        
+        // Import data
+        await this.performImport(data);
+        
+        // Refresh UI
+        await this.loadSettings();
+        this.renderUI();
+        
+        alert('Data imported successfully!');
+        
+      } catch (error) {
+        console.error('Import failed:', error);
+        alert(`Import failed: ${error.message}`);
+      }
+    };
+    
+    input.click();
+  }
+
+  validateImportData(data) {
+    // Check required structure
+    if (!data || typeof data !== 'object') return false;
+    
+    // Validate arrays
+    if (data.customRules && !Array.isArray(data.customRules)) return false;
+    if (data.whitelist && !Array.isArray(data.whitelist)) return false;
+    if (data.recentCleanups && !Array.isArray(data.recentCleanups)) return false;
+    
+    // Validate stats object
+    if (data.stats && typeof data.stats !== 'object') return false;
+    
+    return true;
+  }
+
+  async performImport(data) {
+    // Merge custom rules (avoid duplicates)
+    if (data.customRules) {
+      const existingRules = new Set(this.settings.customRules);
+      data.customRules.forEach(rule => {
+        if (rule && typeof rule === 'string' && !existingRules.has(rule)) {
+          this.settings.customRules.push(rule);
+        }
+      });
+    }
+    
+    // Merge whitelist (avoid duplicates)
+    if (data.whitelist) {
+      const existingWhitelist = new Set(this.whitelist);
+      data.whitelist.forEach(domain => {
+        if (domain && typeof domain === 'string' && !existingWhitelist.has(domain)) {
+          this.whitelist.push(domain);
+        }
+      });
+    }
+    
+    // Merge statistics (add to existing counts)
+    if (data.stats) {
+      this.stats.totalCleaned += (data.stats.totalCleaned || 0);
+      this.stats.parametersRemoved += (data.stats.parametersRemoved || 0);
+      this.stats.sessionsCleared += (data.stats.sessionsCleared || 0);
+    }
+    
+    // Merge recent cleanups (add to beginning, limit to 50)
+    if (data.recentCleanups) {
+      this.recentCleanups = [...data.recentCleanups, ...this.recentCleanups].slice(0, 50);
+    }
+    
+    // Save merged data
+    await chrome.storage.sync.set({
+      customRules: this.settings.customRules,
+      whitelist: this.whitelist,
+      stats: this.stats,
+      recentCleanups: this.recentCleanups
+    });
+    
+    // Update background script with new settings
+    await chrome.runtime.sendMessage({
+      action: 'updateSettings',
+      settings: {
+        customRules: this.settings.customRules,
+        whitelist: this.whitelist
+      }
+    });
+  }
+
+  testUrlCleaning() {
+    const urlInput = document.getElementById('testUrlInput');
+    const resultDiv = document.getElementById('testUrlResult');
+    const url = urlInput.value.trim();
+    
+    if (!url) {
+      resultDiv.innerHTML = '<p class="warning">Please enter a URL to test</p>';
+      return;
+    }
+    
+    try {
+      const cleanedUrl = this.cleanUrl(url);
+      const original = new URL(url);
+      const cleaned = new URL(cleanedUrl);
+      
+      const originalParams = new URLSearchParams(original.search);
+      const cleanedParams = new URLSearchParams(cleaned.search);
+      const removedParams = [];
+      
+      for (const [key, value] of originalParams) {
+        if (!cleanedParams.has(key)) {
+          removedParams.push(`${key}=${value}`);
+        }
+      }
+      
+      let resultHTML = '<div class="test-result">';
+      resultHTML += `<h4>Test Results</h4>`;
+      resultHTML += `<div class="url-comparison">`;
+      resultHTML += `<div class="original-url"><strong>Original URL:</strong><br><code>${url}</code></div>`;
+      resultHTML += `<div class="cleaned-url"><strong>Cleaned URL:</strong><br><code>${cleanedUrl}</code></div>`;
+      resultHTML += `</div>`;
+      
+      if (removedParams.length > 0) {
+        resultHTML += `<div class="removed-params">`;
+        resultHTML += `<h5>Removed Parameters (${removedParams.length}):</h5>`;
+        resultHTML += `<ul>`;
+        removedParams.forEach(param => {
+          resultHTML += `<li><code>${param}</code></li>`;
+        });
+        resultHTML += `</ul>`;
+        resultHTML += `</div>`;
+        resultHTML += `<p class="success">✓ This URL would be cleaned by the extension</p>`;
+      } else {
+        resultHTML += `<p class="info">ℹ No tracking parameters found in this URL</p>`;
+      }
+      
+      resultHTML += '</div>';
+      resultDiv.innerHTML = resultHTML;
+      
+    } catch (error) {
+      resultDiv.innerHTML = `<p class="error">Invalid URL format: ${error.message}</p>`;
+    }
+  }
+
+  cleanUrl(url) {
+    try {
+      const urlObj = new URL(url);
+      const params = new URLSearchParams(urlObj.search);
+      
+      const allTrackingParams = [
+        ...this.builtinRules,
+        ...this.settings.customRules
+      ].filter(rule => !this.settings.disabledRules.has(rule));
+      
+      allTrackingParams.forEach(param => params.delete(param));
+      
+      urlObj.search = params.toString();
+      return urlObj.toString();
+    } catch (error) {
+      console.error('Error cleaning URL:', error);
+      return url;
+    }
   }
 
   async clearAllStats() {
