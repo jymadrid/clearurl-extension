@@ -142,7 +142,20 @@
 
           <div class="stats-actions">
             <button id="exportStats" class="btn secondary">Export Data</button>
+            <button id="importStats" class="btn secondary">Import Data</button>
             <button id="clearAllStats" class="btn danger">Clear All Statistics</button>
+          </div>
+          
+          <div class="url-tester-section">
+            <h3>URL Tester</h3>
+            <p>Test URLs to see what tracking parameters would be removed:</p>
+            <div class="test-input-group">
+              <input type="url" id="testUrlInput" placeholder="Enter a URL to test (e.g., https://example.com?utm_source=test&param=keep)" class="url-input">
+              <button id="testUrlBtn" class="btn primary">Test URL</button>
+            </div>
+            <div id="testUrlResult" class="test-result-container">
+              <!-- Test results will appear here -->
+            </div>
           </div>
         </div>
       </div>
