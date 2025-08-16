@@ -1,288 +1,92 @@
-# ClearURL: Privacy-Focused URL Cleaner
-
-A lightweight browser extension that automatically removes tracking parameters from URLs to enhance your privacy while browsing.
-
-ClearURL is an open-source Chrome extension that helps protect user privacy by automatically removing tracking parameters from URLs. Built with modern web standards and designed for performance, it operates transparently in the background to clean URLs without impacting browsing experience.
-
-## 🎯 Purpose
-
-Online tracking has become increasingly sophisticated, with companies embedding tracking parameters in URLs to monitor user behavior across websites. ClearURL addresses this privacy concern by automatically identifying and removing these parameters, helping users maintain better privacy without manual intervention.
-
-## ⚡ Technical Architecture
-
-ClearURL leverages Chrome's modern `declarativeNetRequest` API for efficient URL processing at the network layer. This approach provides better performance compared to traditional JavaScript-based solutions while maintaining a minimal memory footprint.
-
-## 🚀 Key Features
-
-### 🎯 **Automatic URL Cleaning**
-- Real-time parameter removal using Chrome's declarativeNetRequest API
-- Zero-latency processing with minimal performance impact
-- Smart parameter detection with comprehensive rule coverage
-
-### 📊 **Privacy Analytics**  
-- Activity tracking with transparent statistics
-- Recent cleanup history for user awareness
-- Quantified protection metrics to understand privacy improvements
-
-### ⚙️ **Flexible Configuration**
-- Customizable rule engine for advanced users
-- Whitelist functionality for site-specific exceptions
-- Easy toggle controls for quick activation/deactivation
-
-### 🏠 **Site Management**
-- Per-domain control for granular privacy settings
-- One-click site exemptions for trusted domains
-- Global controls with site-specific overrides
-
-### 🔔 **User Feedback**
-- Optional notification system for transparency
-- Badge indicators showing cleanup activity
-- Unobtrusive privacy protection with minimal interface
-
-## 🚀 Installation
-
-### 📦 **Chrome Web Store**
-1. Visit the Chrome Web Store (coming soon)
-2. Click "Add to Chrome" 
-3. Confirm permissions when prompted
-4. The extension icon will appear in your browser toolbar
-
-### 🔧 **Development Installation**
-For developers or advanced users who want to install from source:
-
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/jymadrid/clearurl-extension.git
-   cd clearurl-extension
-   ```
-
-2. Open Chrome and navigate to `chrome://extensions/`
-
-3. Enable "Developer mode" in the top right
-
-4. Click "Load unpacked" and select the extension directory
-
-5. The extension should now appear in your extensions list
-
-## 🏗️ Technical Implementation
-
-### **Core Technologies**
-- **JavaScript (ES2022+)** - Modern language features with async/await
-- **Chrome Extension Manifest V3** - Latest extension platform standards
-- **declarativeNetRequest API** - Efficient network-level URL processing
-- **Chrome Storage API** - Persistent settings and statistics storage
-
-### **Architecture Overview**
-The extension uses a modular architecture with clear separation of concerns:
-
-#### **🎯 Service Worker (`background.js`)**
-- Handles URL processing and cleanup logic
-- Manages extension statistics and user preferences
-- Provides messaging interface for UI components
-- Implements rule-based parameter detection
-
-#### **💻 Popup Interface (`popup.html/js/css`)**
-- Displays real-time privacy statistics
-- Provides quick access to extension controls
-- Shows recent cleanup activity
-- Offers one-click site management
-
-#### **⚙️ Options Page (`options.html/js/css`)**
-- Comprehensive settings management
-- Advanced rule configuration
-- Whitelist management interface
-- Data export and import capabilities
-
-#### **📋 Rule Configuration (`rules.json`)**
-- Declarative rules for network request processing
-- Optimized regex patterns for parameter matching
-- Designed for performance and maintainability
-
-## 🎯 Supported Tracking Parameters
-
-ClearURL automatically removes over 50 common tracking parameters from URLs:
-
-### **🔍 Analytics Platforms**
-- **Google Analytics**: `utm_source`, `utm_medium`, `utm_campaign`, `utm_term`, `utm_content`, `utm_id`
-- **Google Ads**: `gclid`, `gad_source`, `gbraid`, `wbraid` - *Click tracking parameters*
-
-### **📱 Social Media Platforms**
-- **Facebook**: `fbclid` - *Facebook click identifier*
-- **Instagram**: `igshid` - *Instagram share identifier*  
-- **Twitter**: `twclid` - *Twitter click tracking*
-- **Microsoft**: `msclkid` - *Microsoft advertising click tracking*
-
-### **🎮 Marketing & Analytics Tools**
-- **Google Analytics Enhanced**: `_ga`, `_gl` - *Client and link tracking*
-- **HubSpot**: `_hsenc`, `_hsmi`, `hsCtaTracking`, `hsa_*` - *HubSpot tracking suite*
-- **Piwik/Matomo**: `pk_*`, `piwik_*` - *Open-source analytics tracking*
-- **Email Marketing**: Various campaign and source tracking parameters
-
-*For a complete list of supported parameters, see [background.js:107-120](background.js#L107-L120)*
-
-## ⚙️ Usage & Configuration
-
-### **🎛️ Main Controls**
-- **Extension Toggle**: Enable/disable URL cleaning globally
-- **Statistics Display**: View real-time cleaning activity and metrics  
-- **Recent Activity**: See recently cleaned URLs and removed parameters
-
-### **🛡️ Site Management**
-- **Whitelist Control**: Add trusted sites that should be exempted from cleaning
-- **Per-Domain Settings**: Configure cleaning behavior for specific websites
-- **Quick Toggle**: Easily enable/disable cleaning for the current site
-
-### **🏴 Advanced Options**
-- **Custom Rules**: Define additional tracking parameters to remove
-- **Export/Import**: Backup and restore extension settings
-- **Statistics Reset**: Clear accumulated usage data
-
-## 🔒 Privacy & Security
-
-### **🛡️ Privacy-First Design**
-ClearURL is built with privacy as the core principle:
-- **🚫 No External Communication** - All processing happens locally on your device
-- **🔐 Local Data Storage** - Statistics and settings stored securely in your browser  
-- **👻 Transparent Operation** - No hidden data collection or transmission
-- **🕵️ Minimal Permissions** - Only requests necessary browser permissions
-
-### **🔑 Required Permissions**
-- **`declarativeNetRequest`**: Process and clean URLs at the network level
-- **`storage`**: Save user preferences and statistics locally
-- **`activeTab`**: Access current page information for site-specific controls
-- **`<all_urls>`**: Monitor and clean URLs across all websites
-
-*Each permission serves a specific privacy protection function and is essential for the extension's operation.*
-
-## 🤝 Contributing
-
-We welcome contributions from developers, privacy advocates, and users who want to help improve online privacy. There are many ways to contribute:
-
-### 🐛 Reporting Issues
-1. Check [existing issues](https://github.com/jymadrid/clearurl-extension/issues) first
-2. Create detailed bug reports including:
-   - Browser version and operating system
-   - Steps to reproduce the issue
-   - Expected vs actual behavior
-   - Screenshots or error messages if applicable
-
-### 📝 Improving Documentation
-- Help translate the extension to other languages
-- Improve README documentation and examples
-- Add educational content about online privacy
-- Create user guides and tutorials
-
-### 🔧 Adding New Tracking Parameters
-1. Research the parameter and document its purpose
-2. Test that removing it doesn't break website functionality
-3. Submit a pull request with:
-   - Parameter name and description
-   - Documentation or source references
-   - Test cases demonstrating the change
-
-### 💻 Code Contributions
-1. Fork the repository and create a feature branch
-2. Make your changes with appropriate tests
-3. Follow the existing code style and conventions
-4. Submit a pull request with a detailed description
-
-### 🧪 Testing & Quality Assurance
-- Test the extension on different websites
-- Report compatibility issues
-- Help with performance testing
-- Contribute to automated testing efforts
-
-### Development Setup
-
-```bash
-# Clone the repository
-git clone https://github.com/jymadrid/clearurl-extension.git
-cd clearurl-extension
-
-# Install development dependencies
-npm install
-
-# Run tests
-npm test
-
-# Run linting
-npm run lint
-
-# Build for production
-npm run build
-```
-
-## 📈 Development Roadmap
-
-We're committed to continuously improving ClearURL based on community feedback and evolving privacy needs.
-
-### Version 1.1.0 - Enhanced Functionality
-- [ ] **Firefox Compatibility** - Extend support to Firefox users
-- [ ] **Settings Import/Export** - Backup and restore configuration
-- [ ] **Advanced Regex Rules** - User-defined custom tracking parameters
-- [ ] **Performance Dashboard** - Detailed metrics and impact analysis
-- [ ] **Bulk Whitelist Management** - Import/export whitelist configurations
-
-### Version 1.2.0 - Community Features
-- [ ] **Rule Sharing Platform** - Community-contributed tracking parameter definitions
-- [ ] **Automatic Rule Updates** - Keep up with new tracking methods automatically
-- [ ] **Privacy Tool Integration** - Work seamlessly with other privacy extensions
-- [ ] **Mobile Browser Support** - Extend to mobile browsing platforms
-- [ ] **Educational Content** - In-app privacy education and tips
-
-### Version 2.0.0 - Advanced Privacy Features
-- [ ] **AI-Powered Detection** - Machine learning for new tracking pattern recognition
-- [ ] **Network Analysis** - Deep inspection of tracking behavior patterns
-- [ ] **Privacy Score** - Quantified privacy protection metrics
-- [ ] **Integration APIs** - Allow other privacy tools to leverage ClearURL
-
-### Community Priorities
-We regularly review community feedback to prioritize development. Popular requests include:
-- Better visualization of cleaned URLs
-- Integration with password managers
-- Corporate deployment features
-- Advanced logging and auditing
-
-*Have a feature request? [Open an issue](https://github.com/jymadrid/clearurl-extension/issues) and let's discuss it!*
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-The MIT License ensures this project remains open source and free for everyone to use, modify, and distribute.
-
-## 🙏 Acknowledgments
-
-ClearURL is built with appreciation for:
-
-- **Chrome Extension APIs** - Google's comprehensive extension platform
-- **Privacy Research Community** - Researchers who identify and document tracking methods
-- **Open Source Contributors** - Developers who contribute code, documentation, and feedback
-- **Privacy Advocates** - Users who help test and improve the extension
-- **Web Standards Groups** - Organizations working to improve web privacy standards
-
-## 📞 Support & Community
-
-### Getting Help
-- **📖 Documentation**: [Extension wiki and guides](https://github.com/jymadrid/clearurl-extension/wiki)
-- **🐛 Bug Reports**: [GitHub Issues](https://github.com/jymadrid/clearurl-extension/issues)
-- **💬 Discussions**: [Community Q&A](https://github.com/jymadrid/clearurl-extension/discussions)
-- **📧 Contact**: For security issues, email jymadrid@protonmail.com
-
-### Community Guidelines
-We're committed to maintaining a welcoming, inclusive community:
-- Be respectful and constructive in discussions
-- Focus on technical merit and user benefit
-- Help newcomers learn about privacy protection
-- Collaborate openly and share knowledge
-
-### Security & Privacy Issues
-If you discover a security vulnerability, please report it privately to jymadrid@protonmail.com rather than opening a public issue.
+<p align="center">
+  <img src="https://raw.githubusercontent.com/jymadrid/clearurl-extension/main/icons/icon128.png" alt="ClearURL Logo" width="128" height="128">
+</p>
+
+<h1 align="center">ClearURL</h1>
+
+<p align="center">
+  <strong>重塑链接，回归纯粹。</strong>
+</p>
+
+<p align="center">
+  <img alt="Version" src="https://img.shields.io/badge/version-1.0.0-blue.svg?cacheSeconds=2592000" />
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green.svg" />
+  <a href="https://github.com/jymadrid/clearurl-extension/stargazers">
+    <img alt="Stargazers" src="https://img.shields.io/github/stars/jymadrid/clearurl-extension.svg?style=social&label=Star"/>
+  </a>
+</p>
+
+<p align="center">
+  <a href="#-为什么选择-clearurl">理念</a> •
+  <a href="#-安装指南">安装</a> •
+  <a href="#-工作原理">原理</a> •
+  <a href="#-加入我们">贡献</a>
+</p>
 
 ---
 
-**Built with ❤️ for digital privacy**
+> 数字世界，本应如思想般自由。但不知从何时起，我们每一次的点击、跳转，都被附上了无形的枷锁——链接中的跟踪参数。它们记录、分析、定义我们，将开放的互联网，编织成一张张精准营销的巨网。
+>
+> **ClearURL 诞生于一个简单的信念：将链接的权利，归还给每一位用户。**
+>
+> 它不是一款普通的工具，而是一次对纯粹浏览体验的重新探索。它无声地工作，却坚定地为您抹去数字世界中的每一个追踪印记，让您的每一次网络漫游，都只关乎内容本身，无关其他。
 
-*Helping users take control of their online privacy, one URL at a time.*
+## 为什么选择 ClearURL？
 
-**Stars ⭐ and contributions are greatly appreciated!**
+| 核心理念 | 实现方式 |
+| :--- | :--- |
+| **非凡体验，如若无物** | **真正的强大，是让你感觉不到它的存在。** ClearURL 基于 Chrome 最新的 `declarativeNetRequest` 引擎构建，在网络通信的最底层重写规则。这意味着净化过程在瞬间完成，无延迟、零干扰，为您带来如丝般顺滑的无痕浏览体验。|
+| **绝对隐私，本地为王** | **您的隐私，是不可侵犯的领域。** ClearURL 的所有运算，100% 在您的本地设备进行。它不依赖任何云端服务器，也绝不收集、上传或分析您的任何浏览数据。简单说，您的世界，我们从不打扰。|
+| **开源核心，极致透明** | **信任，源于毫无保留的开放。** 我们将全部代码公开，邀请全世界的开发者共同审视、监督和贡献。我们坚信，只有绝对的透明，才能构建绝对的安全感。 |
+| **智能进化，精准守护** | **追踪技术在变，我们的守护也在进化。** ClearURL 的规则库源于全球隐私保护社区的集体智慧，并持续更新。它能精准识别并移除从广告追踪到社交分享的各类参数，确保净化效果，同时绝不破坏网站的核心功能。 |
+
+## 📦 安装指南
+
+### **官方商店 (即将发布)**
+片刻等待，即可在 Chrome 网上应用店一键安装，享受官方带来的便捷与安全。
+
+### **先锋体验 (开发者模式)**
+如果您迫不及待，希望立即体验，可以从源代码进行安装：
+
+1.  **克隆仓库**
+    ```bash
+    git clone https://github.com/jymadrid/clearurl-extension.git
+    ```
+2.  **进入 Chrome 扩展管理页面**
+    在地址栏输入 `chrome://extensions/` 并回车。
+
+3.  **开启开发者模式**
+    激活页面右上角的“开发者模式”开关。
+
+4.  **加载扩展**
+    点击“加载已解压的扩展程序”，然后选中您刚刚克隆的 `clearurl-extension` 文件夹。
+
+完成。ClearURL 图标将静静地出现在您的浏览器工具栏，开始它的守护使命。
+
+## 🛠️ 工作原理：纯净之力，源自精尖科技
+
+ClearURL 的简约背后，是强大技术的支撑。
+
+- **Manifest V3**: 我们采用 Google 最新的扩展规范，从架构上保证了更高的安全性、稳定性和性能。
+- **Service Worker (`background.js`)**: 作为扩展的智能中枢，它在独立的后台线程中运行，负责逻辑处理与状态管理，确保主线程的流畅。
+- **Declarative Net Request**: 这是实现“零延迟”体验的核心技术。我们通过预设的声明式规则，将 URL 净化这一繁重任务，完全交由浏览器内核高效处理，彻底告别了传统 JavaScript 阻断方式带来的性能瓶颈。
+
+## 💖 加入我们，共建一片更纯净的网络
+
+ClearURL 不仅仅是一个项目，更是一场追求数字自由的运动。每一位用户、每一位贡献者，都是这场运动的参与者。
+
+- **提交一个 Issue**: 发现了新的追踪参数，或是程序中的瑕疵？请让我们知道。
+- **参与一次讨论**: 对未来的功能有何创想？欢迎与社区分享。
+- **贡献一份代码**: 无论是修复一个BUG，还是实现一个新功能，我们都无比欢迎。
+
+我们相信，微小的代码，可以汇聚成改变数字世界的巨大力量。
+
+---
+
+<p align="center">
+  <strong>ClearURL — 为每一次纯粹的点击而生。</strong>
+</p>
+
+<p align="center">
+  如果 ClearURL 触动了您，请用一个 ⭐ Star 来表达您的支持。
+</p>
