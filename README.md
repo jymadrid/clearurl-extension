@@ -1,3 +1,7 @@
+<p align="right">
+  <a href="README_zh.md">简体中文</a>
+</p>
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/jymadrid/clearurl-extension/main/icons/icon128.png" alt="ClearURL Logo" width="128" height="128">
 </p>
@@ -5,7 +9,7 @@
 <h1 align="center">ClearURL</h1>
 
 <p align="center">
-  <strong>重塑链接，回归纯粹。</strong>
+  <strong>Reshape links, return to purity.</strong>
 </p>
 
 <p align="center">
@@ -17,76 +21,76 @@
 </p>
 
 <p align="center">
-  <a href="#-为什么选择-clearurl">理念</a> •
-  <a href="#-安装指南">安装</a> •
-  <a href="#-工作原理">原理</a> •
-  <a href="#-加入我们">贡献</a>
+  <a href="#-philosophy">Philosophy</a> •
+  <a href="#-installation-guide">Installation</a> •
+  <a href="#-how-it-works">How It Works</a> •
+  <a href="#-join-us">Contribute</a>
 </p>
 
 ---
 
-> 数字世界，本应如思想般自由。但不知从何时起，我们每一次的点击、跳转，都被附上了无形的枷锁——链接中的跟踪参数。它们记录、分析、定义我们，将开放的互联网，编织成一张张精准营销的巨网。
+> The digital world should be as free as thought. But somewhere along the way, every click and every redirect became shackled with invisible chains—tracking parameters in URLs. They record, analyze, and define us, weaving the open internet into a giant net of precision marketing.
 >
-> **ClearURL 诞生于一个简单的信念：将链接的权利，归还给每一位用户。**
+> **ClearURL was born from a simple belief: to return the power of links to every user.**
 >
-> 它不是一款普通的工具，而是一次对纯粹浏览体验的重新探索。它无声地工作，却坚定地为您抹去数字世界中的每一个追踪印记，让您的每一次网络漫游，都只关乎内容本身，无关其他。
+> It's not just another tool; it's a rediscovery of the pure browsing experience. It works silently but firmly to erase every digital tracking footprint, ensuring that your journey across the web is about the content itself, and nothing else.
 
-## 为什么选择 ClearURL？
+## Why Choose ClearURL?
 
-| 核心理念 | 实现方式 |
-| :--- | :--- |
-| **非凡体验，如若无物** | **真正的强大，是让你感觉不到它的存在。** ClearURL 基于 Chrome 最新的 `declarativeNetRequest` 引擎构建，在网络通信的最底层重写规则。这意味着净化过程在瞬间完成，无延迟、零干扰，为您带来如丝般顺滑的无痕浏览体验。|
-| **绝对隐私，本地为王** | **您的隐私，是不可侵犯的领域。** ClearURL 的所有运算，100% 在您的本地设备进行。它不依赖任何云端服务器，也绝不收集、上传或分析您的任何浏览数据。简单说，您的世界，我们从不打扰。|
-| **开源核心，极致透明** | **信任，源于毫无保留的开放。** 我们将全部代码公开，邀请全世界的开发者共同审视、监督和贡献。我们坚信，只有绝对的透明，才能构建绝对的安全感。 |
-| **智能进化，精准守护** | **追踪技术在变，我们的守护也在进化。** ClearURL 的规则库源于全球隐私保护社区的集体智慧，并持续更新。它能精准识别并移除从广告追踪到社交分享的各类参数，确保净化效果，同时绝不破坏网站的核心功能。 |
+| Core Philosophy          | Implementation                                                                                                                                                                                                                         |
+| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Seamless Experience**  | **True power is feeling its absence.** Built on Chrome's latest `declarativeNetRequest` engine, ClearURL rewrites rules at the lowest level of network communication. This means the cleaning process is instantaneous, with zero latency and no interference, offering a silky-smooth, traceless browsing experience. |
+| **Absolute Privacy**     | **Your privacy is sacred.** All of ClearURL's operations are performed 100% on your local device. It doesn't rely on any cloud servers and will never collect, upload, or analyze any of your browsing data. Simply put, we stay out of your world. |
+| **Open Source Core**     | **Trust comes from complete transparency.** We've made our entire codebase public for developers worldwide to review, scrutinize, and contribute to. We believe that only absolute transparency can build absolute security. |
+| **Intelligent Evolution**| **As tracking technology evolves, so does our protection.** ClearURL's rule set is sourced from the collective wisdom of the global privacy community and is continuously updated. It accurately identifies and removes various parameters, from ad tracking to social sharing, ensuring effective cleaning without breaking core website functionality. |
 
-## 📦 安装指南
+## 📦 Installation Guide
 
-### **官方商店 (即将发布)**
-片刻等待，即可在 Chrome 网上应用店一键安装，享受官方带来的便捷与安全。
+### **Official Store (Coming Soon)**
+A little more patience, and you'll be able to install it with one click from the Chrome Web Store for official convenience and security.
 
-### **先锋体验 (开发者模式)**
-如果您迫不及待，希望立即体验，可以从源代码进行安装：
+### **Pioneer Experience (Developer Mode)**
+If you can't wait to get started, you can install it from the source code:
 
-1.  **克隆仓库**
+1.  **Clone the repository**
     ```bash
     git clone https://github.com/jymadrid/clearurl-extension.git
     ```
-2.  **进入 Chrome 扩展管理页面**
-    在地址栏输入 `chrome://extensions/` 并回车。
+2.  **Go to the Chrome Extensions page**
+    Enter `chrome://extensions/` in your address bar and press Enter.
 
-3.  **开启开发者模式**
-    激活页面右上角的“开发者模式”开关。
+3.  **Enable Developer Mode**
+    Activate the "Developer mode" switch in the top-right corner.
 
-4.  **加载扩展**
-    点击“加载已解压的扩展程序”，然后选中您刚刚克隆的 `clearurl-extension` 文件夹。
+4.  **Load the extension**
+    Click "Load unpacked" and select the `clearurl-extension` folder you just cloned.
 
-完成。ClearURL 图标将静静地出现在您的浏览器工具栏，开始它的守护使命。
+That's it. The ClearURL icon will quietly appear in your browser's toolbar, ready to begin its mission.
 
-## 🛠️ 工作原理：纯净之力，源自精尖科技
+## 🛠️ How It Works: Pure Power from Cutting-Edge Tech
 
-ClearURL 的简约背后，是强大技术的支撑。
+Behind ClearURL's simplicity lies powerful technology.
 
-- **Manifest V3**: 我们采用 Google 最新的扩展规范，从架构上保证了更高的安全性、稳定性和性能。
-- **Service Worker (`background.js`)**: 作为扩展的智能中枢，它在独立的后台线程中运行，负责逻辑处理与状态管理，确保主线程的流畅。
-- **Declarative Net Request**: 这是实现“零延迟”体验的核心技术。我们通过预设的声明式规则，将 URL 净化这一繁重任务，完全交由浏览器内核高效处理，彻底告别了传统 JavaScript 阻断方式带来的性能瓶颈。
+- **Manifest V3**: We use Google's latest extension specification, ensuring higher security, stability, and performance from the ground up.
+- **Service Worker (`background.js`)**: As the extension's intelligent core, it runs in a separate background thread, handling logic and state management to keep the main thread fluid.
+- **Declarative Net Request**: This is the core technology that delivers a "zero-latency" experience. By using predefined declarative rules, we delegate the heavy lifting of URL cleaning entirely to the browser's core for efficient processing, completely eliminating the performance bottlenecks of traditional JavaScript-based blocking methods.
 
-## 💖 加入我们，共建一片更纯净的网络
+## 💖 Join Us, Let's Build a Purer Web Together
 
-ClearURL 不仅仅是一个项目，更是一场追求数字自由的运动。每一位用户、每一位贡献者，都是这场运动的参与者。
+ClearURL is more than just a project; it's a movement for digital freedom. Every user and every contributor is a part of this movement.
 
-- **提交一个 Issue**: 发现了新的追踪参数，或是程序中的瑕疵？请让我们知道。
-- **参与一次讨论**: 对未来的功能有何创想？欢迎与社区分享。
-- **贡献一份代码**: 无论是修复一个BUG，还是实现一个新功能，我们都无比欢迎。
+- **Submit an Issue**: Found a new tracking parameter or a bug? Please let us know.
+- **Join a Discussion**: Have ideas for future features? Share them with the community.
+- **Contribute Code**: Whether it's fixing a bug or implementing a new feature, your contributions are more than welcome.
 
-我们相信，微小的代码，可以汇聚成改变数字世界的巨大力量。
+We believe that small pieces of code can come together to create a powerful force that changes the digital world.
 
 ---
 
 <p align="center">
-  <strong>ClearURL — 为每一次纯粹的点击而生。</strong>
+  <strong>ClearURL — Born for every pure click.</strong>
 </p>
 
 <p align="center">
-  如果 ClearURL 触动了您，请用一个 ⭐ Star 来表达您的支持。
+  If ClearURL resonates with you, please show your support with a ⭐ Star.
 </p>
