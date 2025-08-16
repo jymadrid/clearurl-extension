@@ -21,10 +21,10 @@
 </p>
 
 <p align="center">
-  <a href="#-philosophy">Philosophy</a> •
-  <a href="#-installation-guide">Installation</a> •
-  <a href="#-how-it-works">How It Works</a> •
-  <a href="#-join-us">Contribute</a>
+  <a href="#why-choose-clearurl">Philosophy</a> •
+  <a href="#installation-guide">Installation</a> •
+  <a href="#how-it-works">How It Works</a> •
+  <a href="#join-us">Contribute</a>
 </p>
 
 ---
@@ -67,7 +67,7 @@ If you can't wait to get started, you can install it from the source code:
 
 That's it. The ClearURL icon will quietly appear in your browser's toolbar, ready to begin its mission.
 
-## 🛠️ How It Works: Pure Power from Cutting-Edge Tech
+## 🛠️ How It Works
 
 Behind ClearURL's simplicity lies powerful technology.
 
@@ -75,7 +75,7 @@ Behind ClearURL's simplicity lies powerful technology.
 - **Service Worker (`background.js`)**: As the extension's intelligent core, it runs in a separate background thread, handling logic and state management to keep the main thread fluid.
 - **Declarative Net Request**: This is the core technology that delivers a "zero-latency" experience. By using predefined declarative rules, we delegate the heavy lifting of URL cleaning entirely to the browser's core for efficient processing, completely eliminating the performance bottlenecks of traditional JavaScript-based blocking methods.
 
-## 💖 Join Us, Let's Build a Purer Web Together
+## 💖 Join Us
 
 ClearURL is more than just a project; it's a movement for digital freedom. Every user and every contributor is a part of this movement.
 
