@@ -8,12 +8,15 @@
     "declarativeNetRequest",
     "storage",
     "activeTab",
-    "tabs",
     "webNavigation"
   ],
   
   "host_permissions": [
     "<all_urls>"
+  ],
+
+  "optional_permissions": [
+    "notifications"
   ],
   
   "background": {

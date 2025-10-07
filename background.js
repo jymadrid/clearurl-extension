@@ -3,12 +3,18 @@ class ClearURLService {
     this.stats = {
       totalCleaned: 0,
       parametersRemoved: 0,
-      sessionsCleared: 0
+      sessionsCleared: 0,
+    };
+    this.performanceStats = {
+      averageProcessingTime: 0,
+      totalProcessed: 0,
+      memoryUsage: 0,
+      lastCleanup: Date.now(),
     };
     this.recentCleanups = [];
     this.whitelist = new Set();
     this.isEnabled = true;
-    
+
     this.initialize();
   }
 
@@ -20,12 +26,25 @@ class ClearURLService {
 
   async loadSettings() {
     try {
-      const data = await chrome.storage.sync.get(['stats', 'whitelist', 'isEnabled', 'recentCleanups']);
-      
-      if (data.stats) this.stats = { ...this.stats, ...data.stats };
-      if (data.whitelist) this.whitelist = new Set(data.whitelist);
-      if (data.isEnabled !== undefined) this.isEnabled = data.isEnabled;
-      if (data.recentCleanups) this.recentCleanups = data.recentCleanups;
+      const data = await chrome.storage.sync.get([
+        'stats',
+        'whitelist',
+        'isEnabled',
+        'recentCleanups',
+      ]);
+
+      if (data.stats) {
+        this.stats = { ...this.stats, ...data.stats };
+      }
+      if (data.whitelist) {
+        this.whitelist = new Set(data.whitelist);
+      }
+      if (data.isEnabled !== undefined) {
+        this.isEnabled = data.isEnabled;
+      }
+      if (data.recentCleanups) {
+        this.recentCleanups = data.recentCleanups;
+      }
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -37,7 +56,7 @@ class ClearURLService {
         stats: this.stats,
         whitelist: Array.from(this.whitelist),
         isEnabled: this.isEnabled,
-        recentCleanups: this.recentCleanups.slice(-50)
+        recentCleanups: this.recentCleanups.slice(-50),
       });
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -47,13 +66,13 @@ class ClearURLService {
   async setupRules() {
     if (!this.isEnabled) {
       await chrome.declarativeNetRequest.updateEnabledRulesets({
-        disableRulesetIds: ['tracking_rules']
+        disableRulesetIds: ['tracking_rules'],
       });
       return;
     }
 
     await chrome.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds: ['tracking_rules']
+      enableRulesetIds: ['tracking_rules'],
     });
   }
 
@@ -79,20 +98,32 @@ class ClearURLService {
   }
 
   async handleRuleMatched(details) {
-    if (!this.isEnabled) return;
+    if (!this.isEnabled) {
+      return;
+    }
 
+    const startTime = performance.now();
     const url = new URL(details.request.url);
     const hostname = url.hostname;
 
-    if (this.whitelist.has(hostname)) return;
+    if (this.whitelist.has(hostname)) {
+      return;
+    }
 
     const originalParams = url.search;
     const cleanedUrl = this.cleanUrl(details.request.url);
-    
+
     if (originalParams !== new URL(cleanedUrl).search) {
       this.stats.totalCleaned++;
-      this.stats.parametersRemoved += this.countRemovedParameters(originalParams, new URL(cleanedUrl).search);
-      
+      this.stats.parametersRemoved += this.countRemovedParameters(
+        originalParams,
+        new URL(cleanedUrl).search,
+      );
+
+      // Update performance stats
+      const processingTime = performance.now() - startTime;
+      this.updatePerformanceStats(processingTime);
+
       this.addRecentCleanup(details.request.url, cleanedUrl, hostname);
       await this.saveSettings();
       this.updateBadge();
@@ -103,24 +134,117 @@ class ClearURLService {
     try {
       const urlObj = new URL(url);
       const params = new URLSearchParams(urlObj.search);
-      
-      const trackingParams = [
-        'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
-        'gclid', 'fbclid', 'msclkid', 'twclid', '_ga', '_gl', 'mc_eid', 'igshid',
-        'ref_', 'referrer', 'source', 'campaign', 'click_id', 'trk', 'pk_campaign',
-        'pk_kwd', 'pk_source', 'pk_medium', 'pk_content', 'mtm_source', 'mtm_medium',
-        'mtm_campaign', 'mtm_keyword', 'mtm_content', 'at_medium', 'at_campaign',
-        'ncid', 'cid', 'yclid', '_hsenc', '_hsmi', 'hsCtaTracking', 'hsa_acc',
-        'hsa_ad', 'hsa_cam', 'hsa_grp', 'hsa_kw', 'hsa_mt', 'hsa_net', 'hsa_src',
-        'hsa_tgt', 'hsa_ver', 'vero_conv', 'vero_id', 'wickedid', 'oly_anon_id',
-        'oly_enc_id', '__s', 'rb_clickid', 's_cid', 'ml_subscriber', 'ml_subscriber_hash',
-        'kenshoo_clickid', 'zanpid', 'awesm', 'WT.mc_id', 'pk_vid', 'piwik_campaign',
-        'piwik_kwd', 'redirect_log_mongo_id', 'redirect_mongo_id', 'sb_referer_host',
-        'mkwid', 'pcrid', 'ef_id', 's_kwcid', 'c', 'dclid', 'gad_source', 'gbraid', 'wbraid'
+
+      // Enhanced tracking parameters with regex patterns
+      const trackingPatterns = [
+        // UTM parameters
+        /^utm_/,
+        // Google Analytics
+        /^_ga/,
+        /^_gl/,
+        // Click identifiers
+        /^gclid$/,
+        /^fbclid$/,
+        /^msclkid$/,
+        /^twclid$/,
+        /^dclid$/,
+        /^gbraid$/,
+        /^wbraid$/,
+        // Marketing automation
+        /^mtm_/,
+        /^hs[a-z_]/,
+        /^vero_/,
+        /^kenshoo_/,
+        // Social media tracking
+        /^igshid$/,
+        /^rb_clickid$/,
+        /^s_cid$/,
+        /^ml_subscriber/,
+        // General tracking
+        /^ref_/,
+        /^referrer$/,
+        /^source$/,
+        /^campaign$/,
+        /^click_id$/,
+        /^trk$/,
+        /^pk_/,
+        /^at_/,
+        /^ncid$/,
+        /^cid$/,
+        /^yclid$/,
+        // E-commerce tracking
+        /^itm_/,
+        /^mc_eid$/,
+        /^sb_referer_host$/,
+        /^mkwid$/,
+        /^pcrid$/,
+        /^ef_id$/,
+        /^s_kwcid$/,
+        /^zanpid$/,
+        /^awesm$/,
+        /^WT\.mc_id$/,
+        /^piwik_/,
+        /^redirect_mongo_id$/,
+        /^ceneo_spo$/,
+        /^spm$/,
+        /^vn_/,
+        /^tracking_source$/,
+        /^wickedid$/,
+        /^oly_/,
+        /^__s$/,
+        /^echobox$/,
+        /^srsltid$/,
+        /^mkt_tok$/,
+        /^_openstat$/,
+        /^fb_action_/,
+        /^gs_l$/,
+        /^hmb_/,
+        /^otm_/,
+        /^cmpid$/,
+        /^os_ehash$/,
+        /^__twitter_impression$/,
+        /^wt_?z?mc/,
+        /^wtrid$/,
+        /^[a-z]?mc$/,
+        /^correlation_id$/,
+        /^ref_campaign$/,
+        /^ref_source$/,
+        /%24deep_link/,
+        /%24original_url/,
+        /%243p/,
+        /^rdt$/,
+        /^_branch_match_id$/,
+        /^share_id$/,
+        /^trackId$/,
+        /^tctx$/,
+        /^jb[a-z]*?$/,
+        // Performance and analytics
+        /^echobox$/,
+        /^__hstc$/,
+        /^__hssc$/,
+        /^__hsfp$/,
+        /^hsCtaTracking$/,
+        /^gad_source$/,
+        // Miscellaneous
+        /^action_object_type_map$/,
+        /^action_ref_map$/,
+        /^log_mongo_id$/,
       ];
 
-      trackingParams.forEach(param => params.delete(param));
-      
+      // Remove parameters matching patterns
+      for (const [key, value] of params) {
+        const shouldRemove = trackingPatterns.some(pattern => {
+          if (pattern instanceof RegExp) {
+            return pattern.test(key);
+          }
+          return key === pattern;
+        });
+
+        if (shouldRemove) {
+          params.delete(key);
+        }
+      }
+
       urlObj.search = params.toString();
       return urlObj.toString();
     } catch (error) {
@@ -143,8 +267,8 @@ class ClearURLService {
       timestamp: Date.now(),
       parametersRemoved: this.countRemovedParameters(
         new URL(originalUrl).search,
-        new URL(cleanedUrl).search
-      )
+        new URL(cleanedUrl).search,
+      ),
     };
 
     this.recentCleanups.unshift(cleanup);
@@ -155,49 +279,56 @@ class ClearURLService {
 
   async handleMessage(message, sender, sendResponse) {
     switch (message.action) {
-      case 'getStats':
-        sendResponse({
-          stats: this.stats,
-          recentCleanups: this.recentCleanups,
-          isEnabled: this.isEnabled
-        });
-        break;
-        
-      case 'toggleEnabled':
-        this.isEnabled = !this.isEnabled;
-        await this.setupRules();
+    case 'getStats':
+      sendResponse({
+        stats: this.stats,
+        performanceStats: this.performanceStats,
+        recentCleanups: this.recentCleanups,
+        isEnabled: this.isEnabled,
+      });
+      break;
+
+    case 'toggleEnabled':
+      this.isEnabled = !this.isEnabled;
+      await this.setupRules();
+      await this.saveSettings();
+      this.updateBadge();
+      sendResponse({ isEnabled: this.isEnabled });
+      break;
+
+    case 'addToWhitelist':
+      if (message.hostname) {
+        this.whitelist.add(message.hostname);
         await this.saveSettings();
-        this.updateBadge();
-        sendResponse({ isEnabled: this.isEnabled });
-        break;
-        
-      case 'addToWhitelist':
-        if (message.hostname) {
-          this.whitelist.add(message.hostname);
-          await this.saveSettings();
-        }
-        sendResponse({ success: true });
-        break;
-        
-      case 'removeFromWhitelist':
-        if (message.hostname) {
-          this.whitelist.delete(message.hostname);
-          await this.saveSettings();
-        }
-        sendResponse({ success: true });
-        break;
-        
-      case 'getWhitelist':
-        sendResponse({ whitelist: Array.from(this.whitelist) });
-        break;
-        
-      case 'clearStats':
-        this.stats = { totalCleaned: 0, parametersRemoved: 0, sessionsCleared: 0 };
-        this.recentCleanups = [];
+      }
+      sendResponse({ success: true });
+      break;
+
+    case 'removeFromWhitelist':
+      if (message.hostname) {
+        this.whitelist.delete(message.hostname);
         await this.saveSettings();
-        this.updateBadge();
-        sendResponse({ success: true });
-        break;
+      }
+      sendResponse({ success: true });
+      break;
+
+    case 'getWhitelist':
+      sendResponse({ whitelist: Array.from(this.whitelist) });
+      break;
+
+    case 'clearStats':
+      this.stats = { totalCleaned: 0, parametersRemoved: 0, sessionsCleared: 0 };
+      this.performanceStats = {
+        averageProcessingTime: 0,
+        totalProcessed: 0,
+        memoryUsage: 0,
+        lastCleanup: Date.now(),
+      };
+      this.recentCleanups = [];
+      await this.saveSettings();
+      this.updateBadge();
+      sendResponse({ success: true });
+      break;
     }
   }
 
@@ -223,7 +354,7 @@ class ClearURLService {
     }
 
     const todayCleanups = this.recentCleanups.filter(
-      cleanup => Date.now() - cleanup.timestamp < 24 * 60 * 60 * 1000
+      (cleanup) => Date.now() - cleanup.timestamp < 24 * 60 * 60 * 1000,
     ).length;
 
     if (todayCleanups > 0) {
@@ -234,12 +365,32 @@ class ClearURLService {
     }
   }
 
+  updatePerformanceStats(processingTime) {
+    this.performanceStats.totalProcessed++;
+    this.performanceStats.lastCleanup = Date.now();
+
+    // Calculate rolling average
+    this.performanceStats.averageProcessingTime =
+      (this.performanceStats.averageProcessingTime * (this.performanceStats.totalProcessed - 1) + processingTime) /
+      this.performanceStats.totalProcessed;
+
+    // Update memory usage if available
+    if (performance.memory) {
+      this.performanceStats.memoryUsage = performance.memory.usedJSHeapSize;
+    }
+  }
+
   async trackNavigation(details) {
+    const startTime = performance.now();
     const url = details.url;
     const cleanedUrl = this.cleanUrl(url);
-    
+
     if (url !== cleanedUrl) {
       this.stats.sessionsCleared++;
+
+      const processingTime = performance.now() - startTime;
+      this.updatePerformanceStats(processingTime);
+
       await this.saveSettings();
     }
   }

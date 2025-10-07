@@ -64,26 +64,34 @@ class PopupManager {
   }
 
   updateStats() {
-    document.getElementById('totalCleaned').textContent = this.formatNumber(this.stats.totalCleaned);
-    document.getElementById('parametersRemoved').textContent = this.formatNumber(this.stats.parametersRemoved);
+    document.getElementById('totalCleaned').textContent = this.formatNumber(
+      this.stats.totalCleaned,
+    );
+    document.getElementById('parametersRemoved').textContent = this.formatNumber(
+      this.stats.parametersRemoved,
+    );
   }
 
   updateActivity() {
     const activityList = document.getElementById('activityList');
-    
+
     if (!this.recentCleanups || this.recentCleanups.length === 0) {
       activityList.innerHTML = '<div class="no-activity">No recent activity</div>';
       return;
     }
 
     const recentItems = this.recentCleanups.slice(0, 10);
-    activityList.innerHTML = recentItems.map(cleanup => `
+    activityList.innerHTML = recentItems
+      .map(
+        (cleanup) => `
       <div class="activity-item">
         <div class="activity-site">${this.truncateUrl(cleanup.hostname)}</div>
         <div class="activity-params">${cleanup.parametersRemoved} parameter${cleanup.parametersRemoved !== 1 ? 's' : ''} removed</div>
         <div class="activity-time">${this.formatTime(cleanup.timestamp)}</div>
       </div>
-    `).join('');
+    `,
+      )
+      .join('');
   }
 
   updateToggle() {
@@ -92,10 +100,10 @@ class PopupManager {
 
   updateCurrentSite() {
     document.getElementById('currentSite').textContent = this.currentHostname;
-    
+
     const whitelistBtn = document.getElementById('whitelistBtn');
     const whitelistText = whitelistBtn.querySelector('.whitelist-text');
-    
+
     if (this.isWhitelisted) {
       whitelistBtn.classList.add('whitelisted');
       whitelistText.textContent = 'Remove from Whitelist';
@@ -135,16 +143,16 @@ class PopupManager {
   async toggleWhitelist() {
     try {
       if (this.isWhitelisted) {
-        await chrome.runtime.sendMessage({ 
-          action: 'removeFromWhitelist', 
-          hostname: this.currentHostname 
+        await chrome.runtime.sendMessage({
+          action: 'removeFromWhitelist',
+          hostname: this.currentHostname,
         });
         this.whitelist.delete(this.currentHostname);
         this.isWhitelisted = false;
       } else {
-        await chrome.runtime.sendMessage({ 
-          action: 'addToWhitelist', 
-          hostname: this.currentHostname 
+        await chrome.runtime.sendMessage({
+          action: 'addToWhitelist',
+          hostname: this.currentHostname,
         });
         this.whitelist.add(this.currentHostname);
         this.isWhitelisted = true;
@@ -157,9 +165,9 @@ class PopupManager {
 
   formatNumber(num) {
     if (num >= 1000000) {
-      return (num / 1000000).toFixed(1) + 'M';
+      return `${(num / 1000000).toFixed(1)}M`;
     } else if (num >= 1000) {
-      return (num / 1000).toFixed(1) + 'K';
+      return `${(num / 1000).toFixed(1)}K`;
     }
     return num.toString();
   }
@@ -167,7 +175,7 @@ class PopupManager {
   formatTime(timestamp) {
     const now = Date.now();
     const diff = now - timestamp;
-    
+
     if (diff < 60000) {
       return 'Just now';
     } else if (diff < 3600000) {
@@ -184,7 +192,7 @@ class PopupManager {
 
   truncateUrl(url) {
     if (url.length > 25) {
-      return url.substring(0, 22) + '...';
+      return `${url.substring(0, 22)}...`;
     }
     return url;
   }
