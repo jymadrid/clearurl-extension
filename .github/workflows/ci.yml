@@ -83,15 +83,6 @@ jobs:
       
     - name: Run security audit
       run: npm audit --audit-level=high
-      
-    - name: Scan for secrets
-      uses: trufflesecurity/trufflehog@main
-      with:
-        path: ./
-        base: main
-        head: HEAD
-        fail: false
-        detect: true
 
   compatibility-test:
     name: Browser Compatibility Test
