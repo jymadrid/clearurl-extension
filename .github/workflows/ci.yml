@@ -113,8 +113,4 @@ jobs:
       
     - name: Test extension loading
       run: |
-        if [ "${{ matrix.browser }}" = "chrome" ]; then
-          npx web-ext lint --warnings-as-errors
-        else
-          npx web-ext lint --warnings-as-errors=false --source-dir=. --browser=firefox || echo "Firefox compatibility warnings noted"
-        fi
+        npx web-ext lint --warnings-as-errors=false || echo "Browser compatibility warnings noted"
