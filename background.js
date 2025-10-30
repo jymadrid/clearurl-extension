@@ -232,7 +232,7 @@ class ClearURLService {
       ];
 
       // Remove parameters matching patterns
-      for (const [key, value] of params) {
+      for (const [key] of params) {
         const shouldRemove = trackingPatterns.some(pattern => {
           if (pattern instanceof RegExp) {
             return pattern.test(key);

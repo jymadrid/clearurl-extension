@@ -28,7 +28,7 @@ class PerformanceMonitor {
 
   getAverageProcessingTime() {
     const times = this.metrics.urlProcessingTimes;
-    if (times.length === 0) return 0;
+    if (times.length === 0) {return 0;}
     return times.reduce((a, b) => a + b, 0) / times.length;
   }
 
@@ -439,65 +439,65 @@ class ClearURLService {
 
   async handleMessage(message, sender, sendResponse) {
     switch (message.action) {
-      case 'getStats':
-        sendResponse({
-          stats: this.stats,
-          performanceStats: {
-            ...this.performanceStats,
-            ...this.performanceMonitor.getReport(),
-          },
-          recentCleanups: this.recentCleanups.toArray(),
-          isEnabled: this.isEnabled,
-        });
-        break;
+    case 'getStats':
+      sendResponse({
+        stats: this.stats,
+        performanceStats: {
+          ...this.performanceStats,
+          ...this.performanceMonitor.getReport(),
+        },
+        recentCleanups: this.recentCleanups.toArray(),
+        isEnabled: this.isEnabled,
+      });
+      break;
 
-      case 'toggleEnabled':
-        this.isEnabled = !this.isEnabled;
-        await this.setupRules();
-        this.debouncedStorage.forceSave(); // 立即保存重要设置
-        this.updateBadge();
-        sendResponse({ isEnabled: this.isEnabled });
-        break;
+    case 'toggleEnabled':
+      this.isEnabled = !this.isEnabled;
+      await this.setupRules();
+      this.debouncedStorage.forceSave(); // 立即保存重要设置
+      this.updateBadge();
+      sendResponse({ isEnabled: this.isEnabled });
+      break;
 
-      case 'addToWhitelist':
-        if (message.hostname) {
-          this.whitelist.add(message.hostname);
-          this.saveSettings();
-        }
-        sendResponse({ success: true });
-        break;
+    case 'addToWhitelist':
+      if (message.hostname) {
+        this.whitelist.add(message.hostname);
+        this.saveSettings();
+      }
+      sendResponse({ success: true });
+      break;
 
-      case 'removeFromWhitelist':
-        if (message.hostname) {
-          this.whitelist.delete(message.hostname);
-          this.saveSettings();
-        }
-        sendResponse({ success: true });
-        break;
+    case 'removeFromWhitelist':
+      if (message.hostname) {
+        this.whitelist.delete(message.hostname);
+        this.saveSettings();
+      }
+      sendResponse({ success: true });
+      break;
 
-      case 'getWhitelist':
-        sendResponse({ whitelist: Array.from(this.whitelist) });
-        break;
+    case 'getWhitelist':
+      sendResponse({ whitelist: Array.from(this.whitelist) });
+      break;
 
-      case 'clearStats':
-        this.stats = { totalCleaned: 0, parametersRemoved: 0, sessionsCleared: 0 };
-        this.performanceStats = {
-          averageProcessingTime: 0,
-          totalProcessed: 0,
-          memoryUsage: 0,
-          lastCleanup: Date.now(),
-        };
-        this.recentCleanups.clear();
-        this.urlCache.clear();
-        this.performanceMonitor = new PerformanceMonitor();
-        this.debouncedStorage.forceSave();
-        this.updateBadge();
-        sendResponse({ success: true });
-        break;
+    case 'clearStats':
+      this.stats = { totalCleaned: 0, parametersRemoved: 0, sessionsCleared: 0 };
+      this.performanceStats = {
+        averageProcessingTime: 0,
+        totalProcessed: 0,
+        memoryUsage: 0,
+        lastCleanup: Date.now(),
+      };
+      this.recentCleanups.clear();
+      this.urlCache.clear();
+      this.performanceMonitor = new PerformanceMonitor();
+      this.debouncedStorage.forceSave();
+      this.updateBadge();
+      sendResponse({ success: true });
+      break;
 
-      case 'getPerformanceReport':
-        sendResponse({ report: this.performanceMonitor.getReport() });
-        break;
+    case 'getPerformanceReport':
+      sendResponse({ report: this.performanceMonitor.getReport() });
+      break;
     }
   }
 
