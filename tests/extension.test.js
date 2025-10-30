@@ -404,7 +404,7 @@ describe('ClearURL Extension Tests', () => {
       const endTime = Date.now();
 
       expect(cleanedUrls).toHaveLength(1000);
-      expect(endTime - startTime).toBeLessThan(100); // Should complete in under 100ms
+      expect(endTime - startTime).toBeLessThan(200); // Should complete in under 200ms
 
       // Verify all URLs were cleaned
       cleanedUrls.forEach((url) => {

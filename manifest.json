@@ -56,7 +56,8 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "clearurl@jymadrid.dev",
-      "strict_min_version": "113.0"
+      "strict_min_version": "113.0",
+      "data_collection_opt_out": true
     }
   }
 }
