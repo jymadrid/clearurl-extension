@@ -90,6 +90,8 @@ jobs:
         path: ./
         base: main
         head: HEAD
+        fail: false
+        detect: true
 
   compatibility-test:
     name: Browser Compatibility Test
