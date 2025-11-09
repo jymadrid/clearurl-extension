@@ -2,6 +2,7 @@ class PopupManager {
   constructor() {
     this.currentHostname = '';
     this.isWhitelisted = false;
+    this.customRules = [];
     this.initialize();
   }
 
@@ -34,6 +35,9 @@ class PopupManager {
       const whitelistResponse = await chrome.runtime.sendMessage({ action: 'getWhitelist' });
       this.whitelist = new Set(whitelistResponse.whitelist || []);
       this.isWhitelisted = this.whitelist.has(this.currentHostname);
+
+      const customRulesResponse = await chrome.runtime.sendMessage({ action: 'getCustomRules' });
+      this.customRules = customRulesResponse.customRules || [];
     } catch (error) {
       console.error('Error loading data:', error);
       this.stats = { totalCleaned: 0, parametersRemoved: 0 };
@@ -41,10 +45,18 @@ class PopupManager {
       this.isEnabled = true;
       this.whitelist = new Set();
       this.isWhitelisted = false;
+      this.customRules = [];
     }
   }
 
   setupEventListeners() {
+    // 标签页切换
+    const tabBtns = document.querySelectorAll('.popup-tab-btn');
+    tabBtns.forEach(btn => {
+      btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
+    });
+
+    // 概览标签页
     const enableToggle = document.getElementById('enableToggle');
     const clearStatsBtn = document.getElementById('clearStats');
     const openOptionsBtn = document.getElementById('openOptions');
@@ -54,6 +66,43 @@ class PopupManager {
     clearStatsBtn.addEventListener('click', () => this.clearStats());
     openOptionsBtn.addEventListener('click', () => this.openOptions());
     whitelistBtn.addEventListener('click', () => this.toggleWhitelist());
+
+    // 白名单标签页
+    const addWhitelistBtn = document.getElementById('addWhitelistBtn');
+    const whitelistInput = document.getElementById('whitelistInput');
+
+    addWhitelistBtn.addEventListener('click', () => this.addWhitelist());
+    whitelistInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.addWhitelist();
+    });
+
+    // 自定义规则标签页
+    const addCustomRuleBtn = document.getElementById('addCustomRuleBtn');
+    const customRuleInput = document.getElementById('customRuleInput');
+
+    addCustomRuleBtn.addEventListener('click', () => this.addCustomRule());
+    customRuleInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') this.addCustomRule();
+    });
+  }
+
+  switchTab(tabName) {
+    // 更新标签按钮状态
+    document.querySelectorAll('.popup-tab-btn').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.tab === tabName);
+    });
+
+    // 更新标签内容显示
+    document.querySelectorAll('.popup-tab-content').forEach(content => {
+      content.classList.toggle('active', content.id === tabName);
+    });
+
+    // 如果切换到白名单或自定义规则标签页，刷新列表
+    if (tabName === 'whitelist') {
+      this.updateWhitelistUI();
+    } else if (tabName === 'custom-rules') {
+      this.updateCustomRulesUI();
+    }
   }
 
   updateUI() {
@@ -61,6 +110,8 @@ class PopupManager {
     this.updateActivity();
     this.updateToggle();
     this.updateCurrentSite();
+    this.updateWhitelistUI();
+    this.updateCustomRulesUI();
   }
 
   updateStats() {
@@ -113,6 +164,171 @@ class PopupManager {
     }
   }
 
+  updateWhitelistUI() {
+    const whitelistList = document.getElementById('whitelistList');
+    const whitelistCount = document.getElementById('whitelistCount');
+    const whitelistArray = Array.from(this.whitelist);
+
+    whitelistCount.textContent = whitelistArray.length;
+
+    if (whitelistArray.length === 0) {
+      whitelistList.innerHTML = '<div class="no-items">暂无白名单网站</div>';
+      return;
+    }
+
+    whitelistList.innerHTML = whitelistArray
+      .map(
+        (domain) => `
+      <div class="list-item">
+        <span class="list-item-text">${domain}</span>
+        <button class="list-item-remove" data-domain="${domain}">删除</button>
+      </div>
+    `,
+      )
+      .join('');
+
+    // 添加删除按钮事件监听
+    whitelistList.querySelectorAll('.list-item-remove').forEach(btn => {
+      btn.addEventListener('click', () => this.removeWhitelist(btn.dataset.domain));
+    });
+  }
+
+  updateCustomRulesUI() {
+    const customRulesList = document.getElementById('customRulesList');
+    const customRulesCount = document.getElementById('customRulesCount');
+
+    customRulesCount.textContent = this.customRules.length;
+
+    if (this.customRules.length === 0) {
+      customRulesList.innerHTML = '<div class="no-items">暂无自定义规则</div>';
+      return;
+    }
+
+    customRulesList.innerHTML = this.customRules
+      .map(
+        (rule) => `
+      <div class="list-item">
+        <span class="list-item-text">${rule}</span>
+        <button class="list-item-remove" data-rule="${rule}">删除</button>
+      </div>
+    `,
+      )
+      .join('');
+
+    // 添加删除按钮事件监听
+    customRulesList.querySelectorAll('.list-item-remove').forEach(btn => {
+      btn.addEventListener('click', () => this.removeCustomRule(btn.dataset.rule));
+    });
+  }
+
+  async addWhitelist() {
+    const input = document.getElementById('whitelistInput');
+    const domain = input.value.trim();
+
+    if (!domain) {
+      alert('请输入域名');
+      return;
+    }
+
+    // 简单的域名验证
+    if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(domain)) {
+      alert('请输入有效的域名');
+      return;
+    }
+
+    if (this.whitelist.has(domain)) {
+      alert('该域名已在白名单中');
+      return;
+    }
+
+    try {
+      await chrome.runtime.sendMessage({
+        action: 'addToWhitelist',
+        hostname: domain,
+      });
+      this.whitelist.add(domain);
+      input.value = '';
+      this.updateWhitelistUI();
+
+      // 如果添加的是当前网站，更新状态
+      if (domain === this.currentHostname) {
+        this.isWhitelisted = true;
+        this.updateCurrentSite();
+      }
+    } catch (error) {
+      console.error('Error adding to whitelist:', error);
+      alert('添加失败，请重试');
+    }
+  }
+
+  async removeWhitelist(domain) {
+    try {
+      await chrome.runtime.sendMessage({
+        action: 'removeFromWhitelist',
+        hostname: domain,
+      });
+      this.whitelist.delete(domain);
+      this.updateWhitelistUI();
+
+      // 如果删除的是当前网站，更新状态
+      if (domain === this.currentHostname) {
+        this.isWhitelisted = false;
+        this.updateCurrentSite();
+      }
+    } catch (error) {
+      console.error('Error removing from whitelist:', error);
+      alert('删除失败，请重试');
+    }
+  }
+
+  async addCustomRule() {
+    const input = document.getElementById('customRuleInput');
+    const rule = input.value.trim();
+
+    if (!rule) {
+      alert('请输入参数名');
+      return;
+    }
+
+    // 简单的参数名验证
+    if (!/^[a-zA-Z0-9_-]+$/.test(rule)) {
+      alert('参数名只能包含字母、数字、下划线和连字符');
+      return;
+    }
+
+    if (this.customRules.includes(rule)) {
+      alert('该规则已存在');
+      return;
+    }
+
+    try {
+      await chrome.runtime.sendMessage({
+        action: 'addCustomRule',
+        rule: rule,
+      });
+      this.customRules.push(rule);
+      input.value = '';
+      this.updateCustomRulesUI();
+    } catch (error) {
+      console.error('Error adding custom rule:', error);
+      alert('添加失败，请重试');
+    }
+  }
+
+  async removeCustomRule(rule) {
+    try {
+      await chrome.runtime.sendMessage({
+        action: 'removeCustomRule',
+        rule: rule,
+      });
+      this.customRules = this.customRules.filter(r => r !== rule);
+      this.updateCustomRulesUI();
+    } catch (error) {
+      console.error('Error removing custom rule:', error);
+      alert('删除失败，请重试');
+    }
+  }
+
   async toggleEnabled() {
     try {
       const response = await chrome.runtime.sendMessage({ action: 'toggleEnabled' });
@@ -158,6 +374,7 @@ class PopupManager {
         this.isWhitelisted = true;
       }
       this.updateCurrentSite();
+      this.updateWhitelistUI();
     } catch (error) {
       console.error('Error toggling whitelist:', error);
     }

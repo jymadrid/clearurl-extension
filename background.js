@@ -13,22 +13,36 @@ class ClearURLService {
     };
     this.recentCleanups = [];
     this.whitelist = new Set();
+    this.customRules = [];
     this.isEnabled = true;
+    this.staticRules = [];
 
     this.initialize();
   }
 
   async initialize() {
+    await this.loadStaticRules();
     await this.loadSettings();
-    await this.setupRules();
+    await this.updateRules();
     this.setupEventListeners();
+  }
+
+  async loadStaticRules() {
+    try {
+      const response = await fetch(chrome.runtime.getURL('rules.json'));
+      this.staticRules = await response.json();
+    } catch (error) {
+      console.error('Failed to load static rules:', error);
+      this.staticRules = [];
+    }
   }
 
   async loadSettings() {
     try {
-      const data = await chrome.storage.sync.get([
+      const data = await chrome.storage.local.get([
         'stats',
         'whitelist',
+        'customRules',
         'isEnabled',
         'recentCleanups',
       ]);
@@ -38,6 +52,9 @@ class ClearURLService {
       }
       if (data.whitelist) {
         this.whitelist = new Set(data.whitelist);
+      }
+      if (data.customRules) {
+        this.customRules = data.customRules;
       }
       if (data.isEnabled !== undefined) {
         this.isEnabled = data.isEnabled;
@@ -52,9 +69,10 @@ class ClearURLService {
 
   async saveSettings() {
     try {
-      await chrome.storage.sync.set({
+      await chrome.storage.local.set({
         stats: this.stats,
         whitelist: Array.from(this.whitelist),
+        customRules: this.customRules,
         isEnabled: this.isEnabled,
         recentCleanups: this.recentCleanups.slice(-50),
       });
@@ -63,17 +81,89 @@ class ClearURLService {
     }
   }
 
-  async setupRules() {
-    if (!this.isEnabled) {
-      await chrome.declarativeNetRequest.updateEnabledRulesets({
-        disableRulesetIds: ['tracking_rules'],
-      });
-      return;
-    }
+  async updateRules() {
+    try {
+      // 1. 获取所有现有的动态规则并删除
+      const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
+      const removeRuleIds = existingRules.map(rule => rule.id);
 
-    await chrome.declarativeNetRequest.updateEnabledRulesets({
-      enableRulesetIds: ['tracking_rules'],
-    });
+      if (removeRuleIds.length > 0) {
+        await chrome.declarativeNetRequest.updateDynamicRules({
+          removeRuleIds: removeRuleIds,
+        });
+      }
+
+      // 2. 如果扩展被禁用，不添加任何规则
+      if (!this.isEnabled) {
+        return;
+      }
+
+      // 3. 准备新的规则数组
+      const newRules = [];
+      let ruleId = 1000; // 从1000开始，避免与静态规则冲突
+
+      // 4. 处理静态规则，添加白名单排除
+      for (const staticRule of this.staticRules) {
+        const rule = JSON.parse(JSON.stringify(staticRule)); // 深拷贝
+        rule.id = ruleId++;
+
+        // 如果有白名单，添加到规则的 condition 中
+        if (this.whitelist.size > 0) {
+          if (!rule.condition) {
+            rule.condition = {};
+          }
+          rule.condition.excludedRequestDomains = Array.from(this.whitelist);
+        }
+
+        newRules.push(rule);
+      }
+
+      // 5. 如果有自定义规则，创建一个新的规则
+      if (this.customRules.length > 0) {
+        const customRule = {
+          id: ruleId++,
+          priority: 1,
+          action: {
+            type: 'redirect',
+            redirect: {
+              transform: {
+                queryTransform: {
+                  removeParams: this.customRules,
+                },
+              },
+            },
+          },
+          condition: {
+            resourceTypes: [
+              'main_frame',
+              'sub_frame',
+              'xmlhttprequest',
+              'script',
+              'image',
+              'stylesheet',
+            ],
+          },
+        };
+
+        // 如果有白名单，也要排除
+        if (this.whitelist.size > 0) {
+          customRule.condition.excludedRequestDomains = Array.from(this.whitelist);
+        }
+
+        newRules.push(customRule);
+      }
+
+      // 6. 应用所有新规则
+      if (newRules.length > 0) {
+        await chrome.declarativeNetRequest.updateDynamicRules({
+          addRules: newRules,
+        });
+      }
+
+      console.log(`Updated rules: ${newRules.length} rules applied`);
+    } catch (error) {
+      console.error('Failed to update rules:', error);
+    }
   }
 
   setupEventListeners() {
@@ -120,7 +210,6 @@ class ClearURLService {
         new URL(cleanedUrl).search,
       );
 
-      // Update performance stats
       const processingTime = performance.now() - startTime;
       this.updatePerformanceStats(processingTime);
 
@@ -135,14 +224,10 @@ class ClearURLService {
       const urlObj = new URL(url);
       const params = new URLSearchParams(urlObj.search);
 
-      // Enhanced tracking parameters with regex patterns
       const trackingPatterns = [
-        // UTM parameters
         /^utm_/,
-        // Google Analytics
         /^_ga/,
         /^_gl/,
-        // Click identifiers
         /^gclid$/,
         /^fbclid$/,
         /^msclkid$/,
@@ -150,17 +235,14 @@ class ClearURLService {
         /^dclid$/,
         /^gbraid$/,
         /^wbraid$/,
-        // Marketing automation
         /^mtm_/,
         /^hs[a-z_]/,
         /^vero_/,
         /^kenshoo_/,
-        // Social media tracking
         /^igshid$/,
         /^rb_clickid$/,
         /^s_cid$/,
         /^ml_subscriber/,
-        // General tracking
         /^ref_/,
         /^referrer$/,
         /^source$/,
@@ -172,7 +254,6 @@ class ClearURLService {
         /^ncid$/,
         /^cid$/,
         /^yclid$/,
-        // E-commerce tracking
         /^itm_/,
         /^mc_eid$/,
         /^sb_referer_host$/,
@@ -218,22 +299,22 @@ class ClearURLService {
         /^trackId$/,
         /^tctx$/,
         /^jb[a-z]*?$/,
-        // Performance and analytics
-        /^echobox$/,
         /^__hstc$/,
         /^__hssc$/,
         /^__hsfp$/,
         /^hsCtaTracking$/,
         /^gad_source$/,
-        // Miscellaneous
         /^action_object_type_map$/,
         /^action_ref_map$/,
         /^log_mongo_id$/,
       ];
 
-      // Remove parameters matching patterns
+      // 添加自定义规则到跟踪模式
+      const customPatterns = this.customRules.map(rule => new RegExp(`^${rule}$`));
+      const allPatterns = [...trackingPatterns, ...customPatterns];
+
       for (const [key] of params) {
-        const shouldRemove = trackingPatterns.some(pattern => {
+        const shouldRemove = allPatterns.some(pattern => {
           if (pattern instanceof RegExp) {
             return pattern.test(key);
           }
@@ -290,7 +371,7 @@ class ClearURLService {
 
     case 'toggleEnabled':
       this.isEnabled = !this.isEnabled;
-      await this.setupRules();
+      await this.updateRules();
       await this.saveSettings();
       this.updateBadge();
       sendResponse({ isEnabled: this.isEnabled });
@@ -299,6 +380,7 @@ class ClearURLService {
     case 'addToWhitelist':
       if (message.hostname) {
         this.whitelist.add(message.hostname);
+        await this.updateRules();
         await this.saveSettings();
       }
       sendResponse({ success: true });
@@ -307,6 +389,7 @@ class ClearURLService {
     case 'removeFromWhitelist':
       if (message.hostname) {
         this.whitelist.delete(message.hostname);
+        await this.updateRules();
         await this.saveSettings();
       }
       sendResponse({ success: true });
@@ -314,6 +397,28 @@ class ClearURLService {
 
     case 'getWhitelist':
       sendResponse({ whitelist: Array.from(this.whitelist) });
+      break;
+
+    case 'addCustomRule':
+      if (message.rule && !this.customRules.includes(message.rule)) {
+        this.customRules.push(message.rule);
+        await this.updateRules();
+        await this.saveSettings();
+      }
+      sendResponse({ success: true });
+      break;
+
+    case 'removeCustomRule':
+      if (message.rule) {
+        this.customRules = this.customRules.filter(r => r !== message.rule);
+        await this.updateRules();
+        await this.saveSettings();
+      }
+      sendResponse({ success: true });
+      break;
+
+    case 'getCustomRules':
+      sendResponse({ customRules: this.customRules });
       break;
 
     case 'clearStats':
@@ -340,6 +445,7 @@ class ClearURLService {
       } else {
         this.whitelist.add(hostname);
       }
+      await this.updateRules();
       await this.saveSettings();
     } catch (error) {
       console.error('Error toggling site:', error);
@@ -369,12 +475,10 @@ class ClearURLService {
     this.performanceStats.totalProcessed++;
     this.performanceStats.lastCleanup = Date.now();
 
-    // Calculate rolling average
     this.performanceStats.averageProcessingTime =
       (this.performanceStats.averageProcessingTime * (this.performanceStats.totalProcessed - 1) + processingTime) /
       this.performanceStats.totalProcessed;
 
-    // Update memory usage if available
     if (performance.memory) {
       this.performanceStats.memoryUsage = performance.memory.usedJSHeapSize;
     }

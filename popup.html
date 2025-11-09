@@ -21,39 +21,93 @@
       </div>
     </header>
 
-    <div class="stats-section">
-      <div class="stat-card">
-        <div class="stat-number" id="totalCleaned">0</div>
-        <div class="stat-label">URLs Cleaned</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-number" id="parametersRemoved">0</div>
-        <div class="stat-label">Parameters Removed</div>
-      </div>
-    </div>
+    <!-- 标签页导航 -->
+    <nav class="popup-tabs">
+      <button class="popup-tab-btn active" data-tab="overview">概览</button>
+      <button class="popup-tab-btn" data-tab="whitelist">白名单</button>
+      <button class="popup-tab-btn" data-tab="custom-rules">自定义规则</button>
+    </nav>
 
-    <div class="section">
-      <h3>Recent Activity</h3>
-      <div class="activity-list" id="activityList">
-        <div class="no-activity">No recent activity</div>
+    <!-- 概览标签页 -->
+    <div class="popup-tab-content active" id="overview">
+      <div class="stats-section">
+        <div class="stat-card">
+          <div class="stat-number" id="totalCleaned">0</div>
+          <div class="stat-label">URLs Cleaned</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="parametersRemoved">0</div>
+          <div class="stat-label">Parameters Removed</div>
+        </div>
       </div>
-    </div>
 
-    <div class="actions">
-      <button id="clearStats" class="action-btn secondary">
-        Clear Statistics
-      </button>
-      <button id="openOptions" class="action-btn primary">
-        Settings
-      </button>
-    </div>
+      <div class="section">
+        <h3>Recent Activity</h3>
+        <div class="activity-list" id="activityList">
+          <div class="no-activity">No recent activity</div>
+        </div>
+      </div>
 
-    <div class="current-site">
-      <div class="site-info">
-        <span class="site-url" id="currentSite">example.com</span>
-        <button id="whitelistBtn" class="whitelist-btn">
-          <span class="whitelist-text">Add to Whitelist</span>
+      <div class="actions">
+        <button id="clearStats" class="action-btn secondary">
+          Clear Statistics
         </button>
+        <button id="openOptions" class="action-btn primary">
+          Settings
+        </button>
+      </div>
+
+      <div class="current-site">
+        <div class="site-info">
+          <span class="site-url" id="currentSite">example.com</span>
+          <button id="whitelistBtn" class="whitelist-btn">
+            <span class="whitelist-text">Add to Whitelist</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 白名单标签页 -->
+    <div class="popup-tab-content" id="whitelist">
+      <div class="section">
+        <h3>白名单管理</h3>
+        <p class="section-description">添加到白名单的网站将不会被净化URL参数</p>
+
+        <div class="input-group">
+          <input type="text" id="whitelistInput" placeholder="输入域名 (例如: example.com)" class="text-input">
+          <button id="addWhitelistBtn" class="action-btn primary">添加</button>
+        </div>
+
+        <div class="list-container">
+          <div class="list-header">
+            <span>已添加的白名单 (<span id="whitelistCount">0</span>)</span>
+          </div>
+          <div class="item-list" id="whitelistList">
+            <div class="no-items">暂无白名单网站</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 自定义规则标签页 -->
+    <div class="popup-tab-content" id="custom-rules">
+      <div class="section">
+        <h3>自定义规则管理</h3>
+        <p class="section-description">添加自定义的URL参数以进行净化</p>
+
+        <div class="input-group">
+          <input type="text" id="customRuleInput" placeholder="输入参数名 (例如: utm_custom)" class="text-input">
+          <button id="addCustomRuleBtn" class="action-btn primary">添加</button>
+        </div>
+
+        <div class="list-container">
+          <div class="list-header">
+            <span>自定义参数 (<span id="customRulesCount">0</span>)</span>
+          </div>
+          <div class="item-list" id="customRulesList">
+            <div class="no-items">暂无自定义规则</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
