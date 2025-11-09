@@ -12,6 +12,7 @@ class ClearURLService {
       lastCleanup: Date.now(),
     };
     this.recentCleanups = [];
+    this.cleaningLog = [];
     this.whitelist = new Set();
     this.customRules = [];
     this.isEnabled = true;
@@ -45,6 +46,7 @@ class ClearURLService {
         'customRules',
         'isEnabled',
         'recentCleanups',
+        'cleaningLog',
       ]);
 
       if (data.stats) {
@@ -62,6 +64,9 @@ class ClearURLService {
       if (data.recentCleanups) {
         this.recentCleanups = data.recentCleanups;
       }
+      if (data.cleaningLog) {
+        this.cleaningLog = data.cleaningLog;
+      }
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -75,6 +80,7 @@ class ClearURLService {
         customRules: this.customRules,
         isEnabled: this.isEnabled,
         recentCleanups: this.recentCleanups.slice(-50),
+        cleaningLog: this.cleaningLog.slice(-100), // 只保留最新的100条日志
       });
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -175,6 +181,11 @@ class ClearURLService {
       if (details.frameId === 0) {
         this.trackNavigation(details);
       }
+    });
+
+    // 监听标签页更新以记录净化日志
+    chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+      this.handleTabUpdate(tabId, changeInfo, tab);
     });
 
     chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -358,6 +369,64 @@ class ClearURLService {
     }
   }
 
+  async handleTabUpdate(tabId, changeInfo, tab) {
+    // 只处理 URL 变化的事件
+    if (!changeInfo.url || !this.isEnabled) {
+      return;
+    }
+
+    try {
+      const originalUrl = changeInfo.url;
+      const urlObj = new URL(originalUrl);
+      const hostname = urlObj.hostname;
+
+      // 检查是否在白名单中
+      if (this.whitelist.has(hostname)) {
+        return;
+      }
+
+      // 模拟净化过程
+      const cleanedUrl = this.cleanUrl(originalUrl);
+
+      // 如果 URL 发生了变化，说明有参数被移除
+      if (originalUrl !== cleanedUrl) {
+        const originalParams = new URLSearchParams(urlObj.search);
+        const cleanedParams = new URLSearchParams(new URL(cleanedUrl).search);
+
+        // 计算被移除的参数
+        const removedParams = [];
+        for (const [key] of originalParams) {
+          if (!cleanedParams.has(key)) {
+            removedParams.push(key);
+          }
+        }
+
+        // 添加到净化日志
+        const logEntry = {
+          id: Date.now() + Math.random(), // 唯一ID
+          originalUrl,
+          cleanedUrl,
+          hostname,
+          domain: hostname,
+          removedParams,
+          timestamp: Date.now(),
+          favicon: `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`,
+        };
+
+        this.cleaningLog.unshift(logEntry);
+
+        // 限制日志数量为100条
+        if (this.cleaningLog.length > 100) {
+          this.cleaningLog = this.cleaningLog.slice(0, 100);
+        }
+
+        await this.saveSettings();
+      }
+    } catch (error) {
+      console.error('Error handling tab update:', error);
+    }
+  }
+
   async handleMessage(message, sender, sendResponse) {
     switch (message.action) {
     case 'getStats':
@@ -432,6 +501,16 @@ class ClearURLService {
       this.recentCleanups = [];
       await this.saveSettings();
       this.updateBadge();
+      sendResponse({ success: true });
+      break;
+
+    case 'getCleaningLog':
+      sendResponse({ cleaningLog: this.cleaningLog });
+      break;
+
+    case 'clearCleaningLog':
+      this.cleaningLog = [];
+      await this.saveSettings();
       sendResponse({ success: true });
       break;
     }

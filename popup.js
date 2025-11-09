@@ -3,6 +3,7 @@ class PopupManager {
     this.currentHostname = '';
     this.isWhitelisted = false;
     this.customRules = [];
+    this.cleaningLog = [];
     this.initialize();
   }
 
@@ -38,6 +39,9 @@ class PopupManager {
 
       const customRulesResponse = await chrome.runtime.sendMessage({ action: 'getCustomRules' });
       this.customRules = customRulesResponse.customRules || [];
+
+      const logResponse = await chrome.runtime.sendMessage({ action: 'getCleaningLog' });
+      this.cleaningLog = logResponse.cleaningLog || [];
     } catch (error) {
       console.error('Error loading data:', error);
       this.stats = { totalCleaned: 0, parametersRemoved: 0 };
@@ -46,6 +50,7 @@ class PopupManager {
       this.whitelist = new Set();
       this.isWhitelisted = false;
       this.customRules = [];
+      this.cleaningLog = [];
     }
   }
 
@@ -84,6 +89,13 @@ class PopupManager {
     customRuleInput.addEventListener('keypress', (e) => {
       if (e.key === 'Enter') this.addCustomRule();
     });
+
+    // 净化日志标签页
+    const clearLogBtn = document.getElementById('clearLogBtn');
+    const refreshLogBtn = document.getElementById('refreshLogBtn');
+
+    clearLogBtn.addEventListener('click', () => this.clearLog());
+    refreshLogBtn.addEventListener('click', () => this.refreshLog());
   }
 
   switchTab(tabName) {
@@ -102,6 +114,8 @@ class PopupManager {
       this.updateWhitelistUI();
     } else if (tabName === 'custom-rules') {
       this.updateCustomRulesUI();
+    } else if (tabName === 'cleaning-log') {
+      this.updateCleaningLogUI();
     }
   }
 
@@ -412,6 +426,71 @@ class PopupManager {
       return `${url.substring(0, 22)}...`;
     }
     return url;
+  }
+
+  updateCleaningLogUI() {
+    const logList = document.getElementById('cleaningLogList');
+    const logCount = document.getElementById('logCount');
+
+    logCount.textContent = this.cleaningLog.length;
+
+    if (this.cleaningLog.length === 0) {
+      logList.innerHTML = '<div class="no-items">暂无净化记录</div>';
+      return;
+    }
+
+    logList.innerHTML = this.cleaningLog
+      .map((log) => {
+        const paramsHtml = log.removedParams.length > 5
+          ? `
+            ${log.removedParams.slice(0, 5).map(param =>
+              `<span class="log-item-param-tag">${param}</span>`
+            ).join('')}
+            <span class="log-item-param-count">+${log.removedParams.length - 5} more</span>
+          `
+          : log.removedParams.map(param =>
+              `<span class="log-item-param-tag">${param}</span>`
+            ).join('');
+
+        return `
+          <div class="log-item">
+            <div class="log-item-header">
+              <img src="${log.favicon}" class="log-item-favicon" onerror="this.style.display='none'">
+              <span class="log-item-domain">${log.domain}</span>
+              <span class="log-item-time">${this.formatTime(log.timestamp)}</span>
+            </div>
+            <div class="log-item-url" title="${log.originalUrl}">${log.originalUrl}</div>
+            <div class="log-item-params">
+              ${paramsHtml}
+            </div>
+          </div>
+        `;
+      })
+      .join('');
+  }
+
+  async clearLog() {
+    if (confirm('确定要清空所有净化日志吗？')) {
+      try {
+        await chrome.runtime.sendMessage({ action: 'clearCleaningLog' });
+        this.cleaningLog = [];
+        this.updateCleaningLogUI();
+      } catch (error) {
+        console.error('Error clearing log:', error);
+        alert('清空失败，请重试');
+      }
+    }
+  }
+
+  async refreshLog() {
+    try {
+      const logResponse = await chrome.runtime.sendMessage({ action: 'getCleaningLog' });
+      this.cleaningLog = logResponse.cleaningLog || [];
+      this.updateCleaningLogUI();
+    } catch (error) {
+      console.error('Error refreshing log:', error);
+      alert('刷新失败，请重试');
+    }
   }
 }
 

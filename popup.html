@@ -26,6 +26,7 @@
       <button class="popup-tab-btn active" data-tab="overview">概览</button>
       <button class="popup-tab-btn" data-tab="whitelist">白名单</button>
       <button class="popup-tab-btn" data-tab="custom-rules">自定义规则</button>
+      <button class="popup-tab-btn" data-tab="cleaning-log">净化日志</button>
     </nav>
 
     <!-- 概览标签页 -->
@@ -106,6 +107,28 @@
           </div>
           <div class="item-list" id="customRulesList">
             <div class="no-items">暂无自定义规则</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 净化日志标签页 -->
+    <div class="popup-tab-content" id="cleaning-log">
+      <div class="section">
+        <h3>净化日志</h3>
+        <p class="section-description">查看最近的URL净化记录</p>
+
+        <div class="log-actions">
+          <button id="clearLogBtn" class="action-btn secondary">清空日志</button>
+          <button id="refreshLogBtn" class="action-btn secondary">刷新</button>
+        </div>
+
+        <div class="log-container">
+          <div class="log-header">
+            <span>最近净化记录 (<span id="logCount">0</span>)</span>
+          </div>
+          <div class="log-list" id="cleaningLogList">
+            <div class="no-items">暂无净化记录</div>
           </div>
         </div>
       </div>
