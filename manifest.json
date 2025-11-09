@@ -8,15 +8,15 @@
     "declarativeNetRequest",
     "storage",
     "activeTab",
-    "webNavigation"
-  ],
-  
-  "host_permissions": [
-    "<all_urls>"
+    "webNavigation",
+    "alarms",
+    "clipboardRead",
+    "clipboardWrite",
+    "notifications"
   ],
 
-  "optional_permissions": [
-    "notifications"
+  "host_permissions": [
+    "<all_urls>"
   ],
   
   "background": {

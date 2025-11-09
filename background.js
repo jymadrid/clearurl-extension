@@ -17,15 +17,21 @@ class ClearURLService {
     this.customRules = [];
     this.isEnabled = true;
     this.staticRules = [];
+    this.shortenerDomains = [];
+    this.clipboardCleaningEnabled = false;
+    this.shortUrlExpansionEnabled = false;
+    this.lastClipboardContent = '';
 
     this.initialize();
   }
 
   async initialize() {
     await this.loadStaticRules();
+    await this.loadShortenerDomains();
     await this.loadSettings();
     await this.updateRules();
     this.setupEventListeners();
+    this.setupClipboardMonitoring();
   }
 
   async loadStaticRules() {
@@ -38,6 +44,16 @@ class ClearURLService {
     }
   }
 
+  async loadShortenerDomains() {
+    try {
+      const response = await fetch(chrome.runtime.getURL('shortener_domains.json'));
+      this.shortenerDomains = await response.json();
+    } catch (error) {
+      console.error('Failed to load shortener domains:', error);
+      this.shortenerDomains = [];
+    }
+  }
+
   async loadSettings() {
     try {
       const data = await chrome.storage.local.get([
@@ -47,6 +63,8 @@ class ClearURLService {
         'isEnabled',
         'recentCleanups',
         'cleaningLog',
+        'clipboardCleaningEnabled',
+        'shortUrlExpansionEnabled',
       ]);
 
       if (data.stats) {
@@ -67,6 +85,12 @@ class ClearURLService {
       if (data.cleaningLog) {
         this.cleaningLog = data.cleaningLog;
       }
+      if (data.clipboardCleaningEnabled !== undefined) {
+        this.clipboardCleaningEnabled = data.clipboardCleaningEnabled;
+      }
+      if (data.shortUrlExpansionEnabled !== undefined) {
+        this.shortUrlExpansionEnabled = data.shortUrlExpansionEnabled;
+      }
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -80,7 +104,9 @@ class ClearURLService {
         customRules: this.customRules,
         isEnabled: this.isEnabled,
         recentCleanups: this.recentCleanups.slice(-50),
-        cleaningLog: this.cleaningLog.slice(-100), // 只保留最新的100条日志
+        cleaningLog: this.cleaningLog.slice(-100),
+        clipboardCleaningEnabled: this.clipboardCleaningEnabled,
+        shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
       });
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -180,6 +206,8 @@ class ClearURLService {
     chrome.webNavigation?.onBeforeNavigate?.addListener((details) => {
       if (details.frameId === 0) {
         this.trackNavigation(details);
+        // 处理短链接
+        this.handleShortUrlNavigation(details);
       }
     });
 
@@ -513,6 +541,25 @@ class ClearURLService {
       await this.saveSettings();
       sendResponse({ success: true });
       break;
+
+    case 'toggleClipboardCleaning':
+      this.clipboardCleaningEnabled = !this.clipboardCleaningEnabled;
+      await this.saveSettings();
+      sendResponse({ enabled: this.clipboardCleaningEnabled });
+      break;
+
+    case 'toggleShortUrlExpansion':
+      this.shortUrlExpansionEnabled = !this.shortUrlExpansionEnabled;
+      await this.saveSettings();
+      sendResponse({ enabled: this.shortUrlExpansionEnabled });
+      break;
+
+    case 'getFeatureStatus':
+      sendResponse({
+        clipboardCleaningEnabled: this.clipboardCleaningEnabled,
+        shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
+      });
+      break;
     }
   }
 
@@ -575,6 +622,160 @@ class ClearURLService {
       this.updatePerformanceStats(processingTime);
 
       await this.saveSettings();
+    }
+  }
+
+  // 剪贴板监控功能
+  setupClipboardMonitoring() {
+    // 使用 chrome.alarms API 定期检查剪贴板
+    chrome.alarms.create('clipboardCheck', { periodInMinutes: 0.033 }); // 约2秒
+
+    chrome.alarms.onAlarm.addListener((alarm) => {
+      if (alarm.name === 'clipboardCheck' && this.clipboardCleaningEnabled) {
+        this.monitorClipboard();
+      }
+    });
+
+    // 监听设置变化
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      if (namespace === 'local') {
+        if (changes.clipboardCleaningEnabled) {
+          this.clipboardCleaningEnabled = changes.clipboardCleaningEnabled.newValue;
+        }
+        if (changes.shortUrlExpansionEnabled) {
+          this.shortUrlExpansionEnabled = changes.shortUrlExpansionEnabled.newValue;
+        }
+      }
+    });
+  }
+
+  async monitorClipboard() {
+    if (!this.clipboardCleaningEnabled) return;
+
+    try {
+      const text = await navigator.clipboard.readText();
+
+      // 避免重复处理相同内容
+      if (text === this.lastClipboardContent) return;
+
+      // 检查是否为有效URL
+      if (!this.isValidUrl(text)) return;
+
+      // 净化URL
+      const cleanedUrl = this.cleanUrl(text);
+
+      // 只有在URL发生变化时才写入
+      if (text !== cleanedUrl) {
+        await navigator.clipboard.writeText(cleanedUrl);
+        this.lastClipboardContent = cleanedUrl;
+
+        // 发送通知
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon48.png',
+          title: 'ClearURL',
+          message: '链接已自动净化',
+          priority: 0,
+        });
+      } else {
+        this.lastClipboardContent = text;
+      }
+    } catch (error) {
+      // 静默处理错误，避免频繁日志
+      if (error.message !== 'Document is not focused.') {
+        console.error('Clipboard monitoring error:', error);
+      }
+    }
+  }
+
+  isValidUrl(string) {
+    try {
+      const url = new URL(string);
+      return url.protocol === 'http:' || url.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  }
+
+  // 短链接预解析功能
+  async resolveShortUrl(url, maxRedirects = 5) {
+    let currentUrl = url;
+    let redirectCount = 0;
+
+    while (redirectCount < maxRedirects) {
+      try {
+        const response = await fetch(currentUrl, {
+          method: 'HEAD',
+          redirect: 'manual',
+        });
+
+        // 检查是否有重定向
+        if (response.status >= 300 && response.status < 400) {
+          const location = response.headers.get('Location');
+          if (!location) break;
+
+          // 处理相对URL
+          currentUrl = new URL(location, currentUrl).href;
+          redirectCount++;
+        } else {
+          break;
+        }
+      } catch (error) {
+        console.error('Error resolving short URL:', error);
+        break;
+      }
+    }
+
+    return currentUrl;
+  }
+
+  isShortUrl(url) {
+    try {
+      const urlObj = new URL(url);
+      const hostname = urlObj.hostname.toLowerCase();
+
+      return this.shortenerDomains.some(domain =>
+        hostname === domain || hostname.endsWith('.' + domain)
+      );
+    } catch {
+      return false;
+    }
+  }
+
+  async handleShortUrlNavigation(details) {
+    if (!this.shortUrlExpansionEnabled) return;
+    if (!this.isShortUrl(details.url)) return;
+
+    try {
+      // 显示加载状态
+      chrome.action.setBadgeText({ text: '...' });
+      chrome.action.setBadgeBackgroundColor({ color: '#FFA500' });
+
+      // 解析短链接
+      const resolvedUrl = await this.resolveShortUrl(details.url);
+
+      // 净化最终URL
+      const cleanedUrl = this.cleanUrl(resolvedUrl);
+
+      // 更新标签页
+      if (cleanedUrl !== details.url) {
+        await chrome.tabs.update(details.tabId, { url: cleanedUrl });
+
+        // 发送通知
+        chrome.notifications.create({
+          type: 'basic',
+          iconUrl: 'icons/icon48.png',
+          title: 'ClearURL',
+          message: '短链接已展开并净化',
+          priority: 0,
+        });
+      }
+
+      // 恢复徽章
+      this.updateBadge();
+    } catch (error) {
+      console.error('Error handling short URL:', error);
+      this.updateBadge();
     }
   }
 }

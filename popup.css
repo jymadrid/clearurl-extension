@@ -575,3 +575,45 @@ input:checked + .slider:before {
   color: #666;
   font-size: 13px;
 }
+
+/* 功能开关 */
+.feature-toggles {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feature-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.feature-toggle:hover {
+  border-color: #4CAF50;
+  box-shadow: 0 2px 4px rgba(76, 175, 80, 0.1);
+}
+
+.feature-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.feature-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.feature-desc {
+  font-size: 11px;
+  color: #666;
+  line-height: 1.4;
+}

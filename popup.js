@@ -42,6 +42,10 @@ class PopupManager {
 
       const logResponse = await chrome.runtime.sendMessage({ action: 'getCleaningLog' });
       this.cleaningLog = logResponse.cleaningLog || [];
+
+      const featureResponse = await chrome.runtime.sendMessage({ action: 'getFeatureStatus' });
+      this.clipboardCleaningEnabled = featureResponse.clipboardCleaningEnabled || false;
+      this.shortUrlExpansionEnabled = featureResponse.shortUrlExpansionEnabled || false;
     } catch (error) {
       console.error('Error loading data:', error);
       this.stats = { totalCleaned: 0, parametersRemoved: 0 };
@@ -51,6 +55,8 @@ class PopupManager {
       this.isWhitelisted = false;
       this.customRules = [];
       this.cleaningLog = [];
+      this.clipboardCleaningEnabled = false;
+      this.shortUrlExpansionEnabled = false;
     }
   }
 
@@ -96,6 +102,13 @@ class PopupManager {
 
     clearLogBtn.addEventListener('click', () => this.clearLog());
     refreshLogBtn.addEventListener('click', () => this.refreshLog());
+
+    // 高级功能开关
+    const clipboardToggle = document.getElementById('clipboardCleaningToggle');
+    const shortUrlToggle = document.getElementById('shortUrlExpansionToggle');
+
+    clipboardToggle.addEventListener('change', () => this.toggleClipboardCleaning());
+    shortUrlToggle.addEventListener('change', () => this.toggleShortUrlExpansion());
   }
 
   switchTab(tabName) {
@@ -126,6 +139,7 @@ class PopupManager {
     this.updateCurrentSite();
     this.updateWhitelistUI();
     this.updateCustomRulesUI();
+    this.updateFeatureToggles();
   }
 
   updateStats() {
@@ -490,6 +504,40 @@ class PopupManager {
     } catch (error) {
       console.error('Error refreshing log:', error);
       alert('刷新失败，请重试');
+    }
+  }
+
+  updateFeatureToggles() {
+    const clipboardToggle = document.getElementById('clipboardCleaningToggle');
+    const shortUrlToggle = document.getElementById('shortUrlExpansionToggle');
+
+    if (clipboardToggle) {
+      clipboardToggle.checked = this.clipboardCleaningEnabled;
+    }
+    if (shortUrlToggle) {
+      shortUrlToggle.checked = this.shortUrlExpansionEnabled;
+    }
+  }
+
+  async toggleClipboardCleaning() {
+    try {
+      const response = await chrome.runtime.sendMessage({ action: 'toggleClipboardCleaning' });
+      this.clipboardCleaningEnabled = response.enabled;
+      this.updateFeatureToggles();
+    } catch (error) {
+      console.error('Error toggling clipboard cleaning:', error);
+      alert('切换失败，请重试');
+    }
+  }
+
+  async toggleShortUrlExpansion() {
+    try {
+      const response = await chrome.runtime.sendMessage({ action: 'toggleShortUrlExpansion' });
+      this.shortUrlExpansionEnabled = response.enabled;
+      this.updateFeatureToggles();
+    } catch (error) {
+      console.error('Error toggling short URL expansion:', error);
+      alert('切换失败，请重试');
     }
   }
 }
