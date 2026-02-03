@@ -26,26 +26,19 @@ class PopupManager {
     }
   }
 
+  // 性能优化：使用批量获取数据接口，减少消息往返（5次 -> 1次）
   async loadData() {
     try {
-      const response = await chrome.runtime.sendMessage({ action: 'getStats' });
+      const response = await chrome.runtime.sendMessage({ action: 'getPopupData' });
       this.stats = response.stats || { totalCleaned: 0, parametersRemoved: 0 };
       this.recentCleanups = response.recentCleanups || [];
       this.isEnabled = response.isEnabled !== false;
-
-      const whitelistResponse = await chrome.runtime.sendMessage({ action: 'getWhitelist' });
-      this.whitelist = new Set(whitelistResponse.whitelist || []);
+      this.whitelist = new Set(response.whitelist || []);
       this.isWhitelisted = this.whitelist.has(this.currentHostname);
-
-      const customRulesResponse = await chrome.runtime.sendMessage({ action: 'getCustomRules' });
-      this.customRules = customRulesResponse.customRules || [];
-
-      const logResponse = await chrome.runtime.sendMessage({ action: 'getCleaningLog' });
-      this.cleaningLog = logResponse.cleaningLog || [];
-
-      const featureResponse = await chrome.runtime.sendMessage({ action: 'getFeatureStatus' });
-      this.clipboardCleaningEnabled = featureResponse.clipboardCleaningEnabled || false;
-      this.shortUrlExpansionEnabled = featureResponse.shortUrlExpansionEnabled || false;
+      this.customRules = response.customRules || [];
+      this.cleaningLog = response.cleaningLog || [];
+      this.clipboardCleaningEnabled = response.clipboardCleaningEnabled || false;
+      this.shortUrlExpansionEnabled = response.shortUrlExpansionEnabled || false;
     } catch (error) {
       console.error('Error loading data:', error);
       this.stats = { totalCleaned: 0, parametersRemoved: 0 };

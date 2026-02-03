@@ -22,6 +22,101 @@ class ClearURLService {
     this.shortUrlExpansionEnabled = false;
     this.lastClipboardContent = '';
 
+    // 性能优化：防抖保存
+    this.saveSettingsTimer = null;
+    this.pendingSave = false;
+
+    // 性能优化：预编译正则表达式（避免每次 cleanUrl 调用时重新创建）
+    this.trackingPatterns = [
+      /^utm_/,
+      /^_ga/,
+      /^_gl/,
+      /^gclid$/,
+      /^fbclid$/,
+      /^msclkid$/,
+      /^twclid$/,
+      /^dclid$/,
+      /^gbraid$/,
+      /^wbraid$/,
+      /^mtm_/,
+      /^hs[a-z_]/,
+      /^vero_/,
+      /^kenshoo_/,
+      /^igshid$/,
+      /^rb_clickid$/,
+      /^s_cid$/,
+      /^ml_subscriber/,
+      /^ref_/,
+      /^referrer$/,
+      /^source$/,
+      /^campaign$/,
+      /^click_id$/,
+      /^trk$/,
+      /^pk_/,
+      /^at_/,
+      /^ncid$/,
+      /^cid$/,
+      /^yclid$/,
+      /^itm_/,
+      /^mc_eid$/,
+      /^sb_referer_host$/,
+      /^mkwid$/,
+      /^pcrid$/,
+      /^ef_id$/,
+      /^s_kwcid$/,
+      /^zanpid$/,
+      /^awesm$/,
+      /^WT\.mc_id$/,
+      /^piwik_/,
+      /^redirect_mongo_id$/,
+      /^ceneo_spo$/,
+      /^spm$/,
+      /^vn_/,
+      /^tracking_source$/,
+      /^wickedid$/,
+      /^oly_/,
+      /^__s$/,
+      /^echobox$/,
+      /^srsltid$/,
+      /^mkt_tok$/,
+      /^_openstat$/,
+      /^fb_action_/,
+      /^gs_l$/,
+      /^hmb_/,
+      /^otm_/,
+      /^cmpid$/,
+      /^os_ehash$/,
+      /^__twitter_impression$/,
+      /^wt_?z?mc/,
+      /^wtrid$/,
+      /^[a-z]?mc$/,
+      /^correlation_id$/,
+      /^ref_campaign$/,
+      /^ref_source$/,
+      /%24deep_link/,
+      /%24original_url/,
+      /%243p/,
+      /^rdt$/,
+      /^_branch_match_id$/,
+      /^share_id$/,
+      /^trackId$/,
+      /^tctx$/,
+      /^jb[a-z]*?$/,
+      /^__hstc$/,
+      /^__hssc$/,
+      /^__hsfp$/,
+      /^hsCtaTracking$/,
+      /^gad_source$/,
+      /^action_object_type_map$/,
+      /^action_ref_map$/,
+      /^log_mongo_id$/,
+    ];
+    this.customRulePatterns = [];
+    this.allPatterns = this.trackingPatterns;
+
+    // 剪贴板监控 alarm 名称
+    this.clipboardAlarmName = 'clipboardCheck';
+
     this.initialize();
   }
 
@@ -75,6 +170,7 @@ class ClearURLService {
       }
       if (data.customRules) {
         this.customRules = data.customRules;
+        this.rebuildCustomRulePatterns();
       }
       if (data.isEnabled !== undefined) {
         this.isEnabled = data.isEnabled;
@@ -96,6 +192,14 @@ class ClearURLService {
     }
   }
 
+  // 性能优化：重建自定义规则的正则表达式
+  rebuildCustomRulePatterns() {
+    this.customRulePatterns = this.customRules.map(rule => new RegExp(`^${rule}$`));
+    this.allPatterns = this.customRulePatterns.length > 0
+      ? this.trackingPatterns.concat(this.customRulePatterns)
+      : this.trackingPatterns;
+  }
+
   async saveSettings() {
     try {
       await chrome.storage.local.set({
@@ -111,6 +215,22 @@ class ClearURLService {
     } catch (error) {
       console.error('Failed to save settings:', error);
     }
+  }
+
+  // 性能优化：防抖保存设置（减少 storage 写入频率）
+  scheduleSaveSettings() {
+    if (this.saveSettingsTimer) {
+      this.pendingSave = true;
+      return;
+    }
+    this.saveSettingsTimer = setTimeout(async () => {
+      this.saveSettingsTimer = null;
+      await this.saveSettings();
+      if (this.pendingSave) {
+        this.pendingSave = false;
+        this.scheduleSaveSettings();
+      }
+    }, 500);
   }
 
   async updateRules() {
@@ -134,17 +254,23 @@ class ClearURLService {
       const newRules = [];
       let ruleId = 1000; // 从1000开始，避免与静态规则冲突
 
+      // 性能优化：预先计算白名单数组，避免重复转换
+      const whitelistArray = this.whitelist.size > 0 ? Array.from(this.whitelist) : null;
+
       // 4. 处理静态规则，添加白名单排除
       for (const staticRule of this.staticRules) {
-        const rule = JSON.parse(JSON.stringify(staticRule)); // 深拷贝
+        // 性能优化：使用 structuredClone 替代 JSON 深拷贝
+        const rule = typeof structuredClone === 'function'
+          ? structuredClone(staticRule)
+          : JSON.parse(JSON.stringify(staticRule));
         rule.id = ruleId++;
 
         // 如果有白名单，添加到规则的 condition 中
-        if (this.whitelist.size > 0) {
+        if (whitelistArray) {
           if (!rule.condition) {
             rule.condition = {};
           }
-          rule.condition.excludedRequestDomains = Array.from(this.whitelist);
+          rule.condition.excludedRequestDomains = whitelistArray;
         }
 
         newRules.push(rule);
@@ -178,8 +304,8 @@ class ClearURLService {
         };
 
         // 如果有白名单，也要排除
-        if (this.whitelist.size > 0) {
-          customRule.condition.excludedRequestDomains = Array.from(this.whitelist);
+        if (whitelistArray) {
+          customRule.condition.excludedRequestDomains = whitelistArray;
         }
 
         newRules.push(customRule);
@@ -253,107 +379,20 @@ class ClearURLService {
       this.updatePerformanceStats(processingTime);
 
       this.addRecentCleanup(details.request.url, cleanedUrl, hostname);
-      await this.saveSettings();
+      // 性能优化：使用防抖保存替代立即保存
+      this.scheduleSaveSettings();
       this.updateBadge();
     }
   }
 
+  // 性能优化：使用预编译的正则表达式
   cleanUrl(url) {
     try {
       const urlObj = new URL(url);
       const params = new URLSearchParams(urlObj.search);
 
-      const trackingPatterns = [
-        /^utm_/,
-        /^_ga/,
-        /^_gl/,
-        /^gclid$/,
-        /^fbclid$/,
-        /^msclkid$/,
-        /^twclid$/,
-        /^dclid$/,
-        /^gbraid$/,
-        /^wbraid$/,
-        /^mtm_/,
-        /^hs[a-z_]/,
-        /^vero_/,
-        /^kenshoo_/,
-        /^igshid$/,
-        /^rb_clickid$/,
-        /^s_cid$/,
-        /^ml_subscriber/,
-        /^ref_/,
-        /^referrer$/,
-        /^source$/,
-        /^campaign$/,
-        /^click_id$/,
-        /^trk$/,
-        /^pk_/,
-        /^at_/,
-        /^ncid$/,
-        /^cid$/,
-        /^yclid$/,
-        /^itm_/,
-        /^mc_eid$/,
-        /^sb_referer_host$/,
-        /^mkwid$/,
-        /^pcrid$/,
-        /^ef_id$/,
-        /^s_kwcid$/,
-        /^zanpid$/,
-        /^awesm$/,
-        /^WT\.mc_id$/,
-        /^piwik_/,
-        /^redirect_mongo_id$/,
-        /^ceneo_spo$/,
-        /^spm$/,
-        /^vn_/,
-        /^tracking_source$/,
-        /^wickedid$/,
-        /^oly_/,
-        /^__s$/,
-        /^echobox$/,
-        /^srsltid$/,
-        /^mkt_tok$/,
-        /^_openstat$/,
-        /^fb_action_/,
-        /^gs_l$/,
-        /^hmb_/,
-        /^otm_/,
-        /^cmpid$/,
-        /^os_ehash$/,
-        /^__twitter_impression$/,
-        /^wt_?z?mc/,
-        /^wtrid$/,
-        /^[a-z]?mc$/,
-        /^correlation_id$/,
-        /^ref_campaign$/,
-        /^ref_source$/,
-        /%24deep_link/,
-        /%24original_url/,
-        /%243p/,
-        /^rdt$/,
-        /^_branch_match_id$/,
-        /^share_id$/,
-        /^trackId$/,
-        /^tctx$/,
-        /^jb[a-z]*?$/,
-        /^__hstc$/,
-        /^__hssc$/,
-        /^__hsfp$/,
-        /^hsCtaTracking$/,
-        /^gad_source$/,
-        /^action_object_type_map$/,
-        /^action_ref_map$/,
-        /^log_mongo_id$/,
-      ];
-
-      // 添加自定义规则到跟踪模式
-      const customPatterns = this.customRules.map(rule => new RegExp(`^${rule}$`));
-      const allPatterns = [...trackingPatterns, ...customPatterns];
-
       for (const [key] of params) {
-        const shouldRemove = allPatterns.some(pattern => {
+        const shouldRemove = this.allPatterns.some(pattern => {
           if (pattern instanceof RegExp) {
             return pattern.test(key);
           }
@@ -448,7 +487,8 @@ class ClearURLService {
           this.cleaningLog = this.cleaningLog.slice(0, 100);
         }
 
-        await this.saveSettings();
+        // 性能优化：使用防抖保存替代立即保存
+        this.scheduleSaveSettings();
       }
     } catch (error) {
       console.error('Error handling tab update:', error);
@@ -499,6 +539,7 @@ class ClearURLService {
     case 'addCustomRule':
       if (message.rule && !this.customRules.includes(message.rule)) {
         this.customRules.push(message.rule);
+        this.rebuildCustomRulePatterns();
         await this.updateRules();
         await this.saveSettings();
       }
@@ -508,6 +549,7 @@ class ClearURLService {
     case 'removeCustomRule':
       if (message.rule) {
         this.customRules = this.customRules.filter(r => r !== message.rule);
+        this.rebuildCustomRulePatterns();
         await this.updateRules();
         await this.saveSettings();
       }
@@ -544,6 +586,12 @@ class ClearURLService {
 
     case 'toggleClipboardCleaning':
       this.clipboardCleaningEnabled = !this.clipboardCleaningEnabled;
+      // 性能优化：按需启停剪贴板监控
+      if (this.clipboardCleaningEnabled) {
+        this.startClipboardAlarm();
+      } else {
+        this.stopClipboardAlarm();
+      }
       await this.saveSettings();
       sendResponse({ enabled: this.clipboardCleaningEnabled });
       break;
@@ -556,6 +604,21 @@ class ClearURLService {
 
     case 'getFeatureStatus':
       sendResponse({
+        clipboardCleaningEnabled: this.clipboardCleaningEnabled,
+        shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
+      });
+      break;
+
+    // 性能优化：新增批量获取数据接口，减少消息往返
+    case 'getPopupData':
+      sendResponse({
+        stats: this.stats,
+        performanceStats: this.performanceStats,
+        recentCleanups: this.recentCleanups,
+        isEnabled: this.isEnabled,
+        whitelist: Array.from(this.whitelist),
+        customRules: this.customRules,
+        cleaningLog: this.cleaningLog,
         clipboardCleaningEnabled: this.clipboardCleaningEnabled,
         shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
       });
@@ -621,17 +684,29 @@ class ClearURLService {
       const processingTime = performance.now() - startTime;
       this.updatePerformanceStats(processingTime);
 
-      await this.saveSettings();
+      // 性能优化：使用防抖保存替代立即保存
+      this.scheduleSaveSettings();
     }
+  }
+
+  // 性能优化：剪贴板监控按需启停
+  startClipboardAlarm() {
+    chrome.alarms.create(this.clipboardAlarmName, { periodInMinutes: 0.033 });
+  }
+
+  stopClipboardAlarm() {
+    chrome.alarms.clear(this.clipboardAlarmName);
   }
 
   // 剪贴板监控功能
   setupClipboardMonitoring() {
-    // 使用 chrome.alarms API 定期检查剪贴板
-    chrome.alarms.create('clipboardCheck', { periodInMinutes: 0.033 }); // 约2秒
+    // 性能优化：只在功能启用时创建 alarm
+    if (this.clipboardCleaningEnabled) {
+      this.startClipboardAlarm();
+    }
 
     chrome.alarms.onAlarm.addListener((alarm) => {
-      if (alarm.name === 'clipboardCheck' && this.clipboardCleaningEnabled) {
+      if (alarm.name === this.clipboardAlarmName && this.clipboardCleaningEnabled) {
         this.monitorClipboard();
       }
     });
@@ -641,6 +716,12 @@ class ClearURLService {
       if (namespace === 'local') {
         if (changes.clipboardCleaningEnabled) {
           this.clipboardCleaningEnabled = changes.clipboardCleaningEnabled.newValue;
+          // 性能优化：根据设置变化启停 alarm
+          if (this.clipboardCleaningEnabled) {
+            this.startClipboardAlarm();
+          } else {
+            this.stopClipboardAlarm();
+          }
         }
         if (changes.shortUrlExpansionEnabled) {
           this.shortUrlExpansionEnabled = changes.shortUrlExpansionEnabled.newValue;

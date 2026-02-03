@@ -68,3 +68,4 @@ extension.zip
 # Test files
 test-results/
 .coverage/
+.ace-tool/
