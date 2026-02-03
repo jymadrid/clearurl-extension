@@ -69,3 +69,7 @@ extension.zip
 test-results/
 .coverage/
 .ace-tool/
+
+# Claude Code / AI tools
+.claude/
+.spec-workflow/
