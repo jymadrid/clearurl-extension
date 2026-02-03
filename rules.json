@@ -82,21 +82,13 @@
       "redirect": {
         "transform": {
           "queryTransform": {
-            "removeParams": [
-              "(?:ref_?)?src",
-              "s",
-              "cn",
-              "ref_url",
-              "t"
-            ]
+            "removeParams": ["(?:ref_?)?src", "s", "cn", "ref_url", "t"]
           }
         }
       }
     },
     "condition": {
-      "requestDomains": [
-        "twitter.com"
-      ],
+      "requestDomains": ["twitter.com"],
       "resourceTypes": [
         "main_frame",
         "sub_frame",
@@ -115,21 +107,13 @@
       "redirect": {
         "transform": {
           "queryTransform": {
-            "removeParams": [
-              "(?:ref_?)?src",
-              "s",
-              "cn",
-              "ref_url",
-              "t"
-            ]
+            "removeParams": ["(?:ref_?)?src", "s", "cn", "ref_url", "t"]
           }
         }
       }
     },
     "condition": {
-      "requestDomains": [
-        "x.com"
-      ],
+      "requestDomains": ["x.com"],
       "resourceTypes": [
         "main_frame",
         "sub_frame",
@@ -167,9 +151,7 @@
       }
     },
     "condition": {
-      "requestDomains": [
-        "reddit.com"
-      ],
+      "requestDomains": ["reddit.com"],
       "resourceTypes": [
         "main_frame",
         "sub_frame",
@@ -188,19 +170,13 @@
       "redirect": {
         "transform": {
           "queryTransform": {
-            "removeParams": [
-              "trackId",
-              "tctx",
-              "jb[a-z]*?"
-            ]
+            "removeParams": ["trackId", "tctx", "jb[a-z]*?"]
           }
         }
       }
     },
     "condition": {
-      "requestDomains": [
-        "netflix.com"
-      ],
+      "requestDomains": ["netflix.com"],
       "resourceTypes": [
         "main_frame",
         "sub_frame",

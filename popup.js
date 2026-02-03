@@ -56,7 +56,7 @@ class PopupManager {
   setupEventListeners() {
     // 标签页切换
     const tabBtns = document.querySelectorAll('.popup-tab-btn');
-    tabBtns.forEach(btn => {
+    tabBtns.forEach((btn) => {
       btn.addEventListener('click', () => this.switchTab(btn.dataset.tab));
     });
 
@@ -77,7 +77,9 @@ class PopupManager {
 
     addWhitelistBtn.addEventListener('click', () => this.addWhitelist());
     whitelistInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') this.addWhitelist();
+      if (e.key === 'Enter') {
+        this.addWhitelist();
+      }
     });
 
     // 自定义规则标签页
@@ -86,7 +88,9 @@ class PopupManager {
 
     addCustomRuleBtn.addEventListener('click', () => this.addCustomRule());
     customRuleInput.addEventListener('keypress', (e) => {
-      if (e.key === 'Enter') this.addCustomRule();
+      if (e.key === 'Enter') {
+        this.addCustomRule();
+      }
     });
 
     // 净化日志标签页
@@ -106,12 +110,12 @@ class PopupManager {
 
   switchTab(tabName) {
     // 更新标签按钮状态
-    document.querySelectorAll('.popup-tab-btn').forEach(btn => {
+    document.querySelectorAll('.popup-tab-btn').forEach((btn) => {
       btn.classList.toggle('active', btn.dataset.tab === tabName);
     });
 
     // 更新标签内容显示
-    document.querySelectorAll('.popup-tab-content').forEach(content => {
+    document.querySelectorAll('.popup-tab-content').forEach((content) => {
       content.classList.toggle('active', content.id === tabName);
     });
 
@@ -137,10 +141,10 @@ class PopupManager {
 
   updateStats() {
     document.getElementById('totalCleaned').textContent = this.formatNumber(
-      this.stats.totalCleaned,
+      this.stats.totalCleaned
     );
     document.getElementById('parametersRemoved').textContent = this.formatNumber(
-      this.stats.parametersRemoved,
+      this.stats.parametersRemoved
     );
   }
 
@@ -161,7 +165,7 @@ class PopupManager {
         <div class="activity-params">${cleanup.parametersRemoved} parameter${cleanup.parametersRemoved !== 1 ? 's' : ''} removed</div>
         <div class="activity-time">${this.formatTime(cleanup.timestamp)}</div>
       </div>
-    `,
+    `
       )
       .join('');
   }
@@ -204,12 +208,12 @@ class PopupManager {
         <span class="list-item-text">${domain}</span>
         <button class="list-item-remove" data-domain="${domain}">删除</button>
       </div>
-    `,
+    `
       )
       .join('');
 
     // 添加删除按钮事件监听
-    whitelistList.querySelectorAll('.list-item-remove').forEach(btn => {
+    whitelistList.querySelectorAll('.list-item-remove').forEach((btn) => {
       btn.addEventListener('click', () => this.removeWhitelist(btn.dataset.domain));
     });
   }
@@ -232,12 +236,12 @@ class PopupManager {
         <span class="list-item-text">${rule}</span>
         <button class="list-item-remove" data-rule="${rule}">删除</button>
       </div>
-    `,
+    `
       )
       .join('');
 
     // 添加删除按钮事件监听
-    customRulesList.querySelectorAll('.list-item-remove').forEach(btn => {
+    customRulesList.querySelectorAll('.list-item-remove').forEach((btn) => {
       btn.addEventListener('click', () => this.removeCustomRule(btn.dataset.rule));
     });
   }
@@ -252,7 +256,11 @@ class PopupManager {
     }
 
     // 简单的域名验证
-    if (!/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(domain)) {
+    if (
+      !/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
+        domain
+      )
+    ) {
       alert('请输入有效的域名');
       return;
     }
@@ -342,7 +350,7 @@ class PopupManager {
         action: 'removeCustomRule',
         rule: rule,
       });
-      this.customRules = this.customRules.filter(r => r !== rule);
+      this.customRules = this.customRules.filter((r) => r !== rule);
       this.updateCustomRulesUI();
     } catch (error) {
       console.error('Error removing custom rule:', error);
@@ -448,16 +456,18 @@ class PopupManager {
 
     logList.innerHTML = this.cleaningLog
       .map((log) => {
-        const paramsHtml = log.removedParams.length > 5
-          ? `
-            ${log.removedParams.slice(0, 5).map(param =>
-              `<span class="log-item-param-tag">${param}</span>`
-            ).join('')}
+        const paramsHtml =
+          log.removedParams.length > 5
+            ? `
+            ${log.removedParams
+              .slice(0, 5)
+              .map((param) => `<span class="log-item-param-tag">${param}</span>`)
+              .join('')}
             <span class="log-item-param-count">+${log.removedParams.length - 5} more</span>
           `
-          : log.removedParams.map(param =>
-              `<span class="log-item-param-tag">${param}</span>`
-            ).join('');
+            : log.removedParams
+                .map((param) => `<span class="log-item-param-tag">${param}</span>`)
+                .join('');
 
         return `
           <div class="log-item">

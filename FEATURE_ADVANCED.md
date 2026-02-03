@@ -23,12 +23,7 @@ ClearURL 扩展现在包含两个强大的高级功能，将URL净化能力提�
 
 ```json
 {
-  "permissions": [
-    "clipboardRead",
-    "clipboardWrite",
-    "alarms",
-    "notifications"
-  ]
+  "permissions": ["clipboardRead", "clipboardWrite", "alarms", "notifications"]
 }
 ```
 
@@ -333,26 +328,26 @@ async handleShortUrlNavigation(details) {
 
 ```javascript
 // 切换剪贴板净化
-chrome.runtime.sendMessage({ action: 'toggleClipboardCleaning' })
+chrome.runtime.sendMessage({ action: 'toggleClipboardCleaning' });
 
 // 切换短链接解析
-chrome.runtime.sendMessage({ action: 'toggleShortUrlExpansion' })
+chrome.runtime.sendMessage({ action: 'toggleShortUrlExpansion' });
 
 // 获取功能状态
-chrome.runtime.sendMessage({ action: 'getFeatureStatus' })
+chrome.runtime.sendMessage({ action: 'getFeatureStatus' });
 ```
 
 ### Background → Popup
 
 ```javascript
 // 返回切换结果
-sendResponse({ enabled: true/false })
+sendResponse({ enabled: true / false });
 
 // 返回功能状态
 sendResponse({
-  clipboardCleaningEnabled: true/false,
-  shortUrlExpansionEnabled: true/false
-})
+  clipboardCleaningEnabled: true / false,
+  shortUrlExpansionEnabled: true / false,
+});
 ```
 
 ## 文件修改清单
@@ -388,11 +383,13 @@ sendResponse({
 ### 剪贴板净化不工作
 
 **可能原因**：
+
 - 功能未启用
 - 剪贴板内容不是有效URL
 - 浏览器焦点问题
 
 **解决方案**：
+
 1. 检查功能开关是否打开
 2. 确认复制的是完整URL
 3. 等待2秒后再粘贴
@@ -400,12 +397,14 @@ sendResponse({
 ### 短链接解析失败
 
 **可能原因**：
+
 - 功能未启用
 - 网络连接问题
 - 短链接服务不可用
 - 域名不在列表中
 
 **解决方案**：
+
 1. 检查功能开关是否打开
 2. 检查网络连接
 3. 手动访问短链接
@@ -414,10 +413,12 @@ sendResponse({
 ### 通知不显示
 
 **可能原因**：
+
 - 浏览器通知权限未授予
 - 系统通知被禁用
 
 **解决方案**：
+
 1. 检查浏览器通知权限
 2. 检查系统通知设置
 3. 功能仍然正常工作，只是没有通知

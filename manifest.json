@@ -3,7 +3,7 @@
   "name": "ClearURL: Privacy Link Purifier",
   "version": "1.0.0",
   "description": "Privacy-focused URL cleaner that automatically removes tracking parameters to enhance your browsing privacy",
-  
+
   "permissions": [
     "declarativeNetRequest",
     "storage",
@@ -15,14 +15,12 @@
     "notifications"
   ],
 
-  "host_permissions": [
-    "<all_urls>"
-  ],
-  
+  "host_permissions": ["<all_urls>"],
+
   "background": {
     "service_worker": "background.js"
   },
-  
+
   "action": {
     "default_popup": "popup.html",
     "default_title": "ClearURL: Privacy Link Purifier",
@@ -33,16 +31,16 @@
       "128": "icons/icon128.png"
     }
   },
-  
+
   "options_page": "options.html",
-  
+
   "icons": {
     "16": "icons/icon16.png",
     "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
-  
+
   "declarative_net_request": {
     "rule_resources": [
       {
@@ -52,7 +50,7 @@
       }
     ]
   },
-  
+
   "browser_specific_settings": {
     "gecko": {
       "id": "clearurl@jymadrid.dev",

@@ -11,7 +11,7 @@ console.log(`Reading raw rules from: ${rawDataPath}`);
 if (!fs.existsSync(rawDataPath)) {
   console.error(`Error: Raw data file not found at ${rawDataPath}`);
   console.error(
-    'Please ensure data.min.json from the ClearURLs repository is present in the project root directory.',
+    'Please ensure data.min.json from the ClearURLs repository is present in the project root directory.'
   );
   process.exit(1); // Exit with an error code
 }
@@ -76,7 +76,7 @@ for (const providerName in rawData.providers) {
   }
 
   const paramsToRemove = [...(provider.rules || []), ...(provider.referralMarketing || [])].filter(
-    (p) => p && typeof p === 'string' && p.length > 0,
+    (p) => p && typeof p === 'string' && p.length > 0
   ); // Ensure params are valid, non-empty strings
 
   if (paramsToRemove.length > 0 && provider.urlPattern) {

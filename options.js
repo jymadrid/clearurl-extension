@@ -256,7 +256,7 @@ class OptionsManager {
                ${!this.settings.disabledRules.has(rule) ? 'checked' : ''} 
                onchange="optionsManager.toggleRule('${rule}', this.checked)">
       </div>
-    `,
+    `
       )
       .join('');
   }
@@ -275,7 +275,7 @@ class OptionsManager {
         <span>${rule}</span>
         <button class="rule-remove" onclick="optionsManager.removeCustomRule('${rule}')">&times;</button>
       </div>
-    `,
+    `
       )
       .join('');
   }
@@ -294,20 +294,20 @@ class OptionsManager {
         <span class="whitelist-domain">${domain}</span>
         <button class="whitelist-remove" onclick="optionsManager.removeWhitelistItem('${domain}')">Remove</button>
       </div>
-    `,
+    `
       )
       .join('');
   }
 
   renderStats() {
     document.getElementById('totalCleanedStat').textContent = this.formatNumber(
-      this.stats.totalCleaned,
+      this.stats.totalCleaned
     );
     document.getElementById('parametersRemovedStat').textContent = this.formatNumber(
-      this.stats.parametersRemoved,
+      this.stats.parametersRemoved
     );
     document.getElementById('sessionsCleanedStat').textContent = this.formatNumber(
-      this.stats.sessionsCleared,
+      this.stats.sessionsCleared
     );
 
     const activityLog = document.getElementById('activityLog');
@@ -327,7 +327,7 @@ class OptionsManager {
         </div>
         <div class="activity-time">${this.formatTime(cleanup.timestamp)}</div>
       </div>
-    `,
+    `
       )
       .join('');
   }
@@ -344,7 +344,7 @@ class OptionsManager {
   resetRules() {
     if (
       confirm(
-        'Reset all rules to default settings? This will remove all custom rules and re-enable all built-in rules.',
+        'Reset all rules to default settings? This will remove all custom rules and re-enable all built-in rules.'
       )
     ) {
       this.settings.customRules = [];
@@ -626,7 +626,7 @@ class OptionsManager {
       const params = new URLSearchParams(urlObj.search);
 
       const allTrackingParams = [...this.builtinRules, ...this.settings.customRules].filter(
-        (rule) => !this.settings.disabledRules.has(rule),
+        (rule) => !this.settings.disabledRules.has(rule)
       );
 
       allTrackingParams.forEach((param) => params.delete(param));

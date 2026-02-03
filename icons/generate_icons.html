@@ -1,141 +1,141 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>ClearURL Icon Generator</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            text-align: center; 
-            padding: 20px;
-            background: #f5f5f5;
-        }
-        .icon-container { 
-            display: inline-block; 
-            margin: 20px; 
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .icon-size { 
-            margin: 10px; 
-        }
-        canvas {
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+      .icon-container {
+        display: inline-block;
+        margin: 20px;
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .icon-size {
+        margin: 10px;
+      }
+      canvas {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <h1>ClearURL Extension Icons</h1>
     <p>Right-click each icon below and "Save image as..." to save PNG files</p>
-    
+
     <div class="icon-container">
-        <h3>16x16 (icon16.png)</h3>
-        <canvas id="icon16" width="16" height="16"></canvas>
+      <h3>16x16 (icon16.png)</h3>
+      <canvas id="icon16" width="16" height="16"></canvas>
     </div>
-    
+
     <div class="icon-container">
-        <h3>32x32 (icon32.png)</h3>
-        <canvas id="icon32" width="32" height="32"></canvas>
+      <h3>32x32 (icon32.png)</h3>
+      <canvas id="icon32" width="32" height="32"></canvas>
     </div>
-    
+
     <div class="icon-container">
-        <h3>48x48 (icon48.png)</h3>
-        <canvas id="icon48" width="48" height="48"></canvas>
+      <h3>48x48 (icon48.png)</h3>
+      <canvas id="icon48" width="48" height="48"></canvas>
     </div>
-    
+
     <div class="icon-container">
-        <h3>128x128 (icon128.png)</h3>
-        <canvas id="icon128" width="128" height="128"></canvas>
+      <h3>128x128 (icon128.png)</h3>
+      <canvas id="icon128" width="128" height="128"></canvas>
     </div>
 
     <script>
-        function drawIcon(canvas, size) {
-            const ctx = canvas.getContext('2d');
-            const scale = size / 128;
-            
-            ctx.scale(scale, scale);
-            
-            // Background circle
-            ctx.beginPath();
-            ctx.arc(64, 64, 60, 0, 2 * Math.PI);
-            ctx.fillStyle = '#4CAF50';
-            ctx.fill();
-            ctx.strokeStyle = '#2E7D32';
-            ctx.lineWidth = 4;
-            ctx.stroke();
-            
-            // Shield shape
-            ctx.beginPath();
-            ctx.moveTo(64, 20);
-            ctx.lineTo(84, 30);
-            ctx.lineTo(84, 55);
-            ctx.quadraticCurveTo(84, 70, 64, 85);
-            ctx.quadraticCurveTo(44, 70, 44, 55);
-            ctx.lineTo(44, 30);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            ctx.fill();
-            
-            // Chain links
-            ctx.strokeStyle = '#2E7D32';
-            ctx.lineWidth = 3;
-            ctx.fillStyle = 'transparent';
-            
-            // Left link
-            ctx.beginPath();
-            ctx.arc(52, 48, 6, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            // Right link
-            ctx.beginPath();
-            ctx.arc(76, 48, 6, 0, 2 * Math.PI);
-            ctx.stroke();
-            
-            // Connection line
-            ctx.beginPath();
-            ctx.moveTo(58, 48);
-            ctx.lineTo(70, 48);
-            ctx.stroke();
-            
-            // Text "utm_*"
-            ctx.fillStyle = '#2E7D32';
-            ctx.font = 'bold 8px monospace';
-            ctx.textAlign = 'center';
-            ctx.fillText('utm_*', 64, 68);
-            
-            // Strike-through line
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 3;
-            ctx.globalAlpha = 0.8;
-            ctx.beginPath();
-            ctx.moveTo(45, 65);
-            ctx.lineTo(83, 65);
-            ctx.stroke();
-            ctx.globalAlpha = 1;
-            
-            // Clean indicator
-            ctx.beginPath();
-            ctx.arc(90, 38, 8, 0, 2 * Math.PI);
-            ctx.fillStyle = '#FFD700';
-            ctx.fill();
-            ctx.strokeStyle = '#FFA000';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // Checkmark
-            ctx.fillStyle = '#2E7D32';
-            ctx.font = 'bold 10px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('✓', 90, 42);
-        }
-        
-        // Generate all icon sizes
-        ['16', '32', '48', '128'].forEach(size => {
-            const canvas = document.getElementById('icon' + size);
-            drawIcon(canvas, parseInt(size));
-        });
+      function drawIcon(canvas, size) {
+        const ctx = canvas.getContext('2d');
+        const scale = size / 128;
+
+        ctx.scale(scale, scale);
+
+        // Background circle
+        ctx.beginPath();
+        ctx.arc(64, 64, 60, 0, 2 * Math.PI);
+        ctx.fillStyle = '#4CAF50';
+        ctx.fill();
+        ctx.strokeStyle = '#2E7D32';
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Shield shape
+        ctx.beginPath();
+        ctx.moveTo(64, 20);
+        ctx.lineTo(84, 30);
+        ctx.lineTo(84, 55);
+        ctx.quadraticCurveTo(84, 70, 64, 85);
+        ctx.quadraticCurveTo(44, 70, 44, 55);
+        ctx.lineTo(44, 30);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fill();
+
+        // Chain links
+        ctx.strokeStyle = '#2E7D32';
+        ctx.lineWidth = 3;
+        ctx.fillStyle = 'transparent';
+
+        // Left link
+        ctx.beginPath();
+        ctx.arc(52, 48, 6, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // Right link
+        ctx.beginPath();
+        ctx.arc(76, 48, 6, 0, 2 * Math.PI);
+        ctx.stroke();
+
+        // Connection line
+        ctx.beginPath();
+        ctx.moveTo(58, 48);
+        ctx.lineTo(70, 48);
+        ctx.stroke();
+
+        // Text "utm_*"
+        ctx.fillStyle = '#2E7D32';
+        ctx.font = 'bold 8px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('utm_*', 64, 68);
+
+        // Strike-through line
+        ctx.strokeStyle = 'red';
+        ctx.lineWidth = 3;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        ctx.moveTo(45, 65);
+        ctx.lineTo(83, 65);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+
+        // Clean indicator
+        ctx.beginPath();
+        ctx.arc(90, 38, 8, 0, 2 * Math.PI);
+        ctx.fillStyle = '#FFD700';
+        ctx.fill();
+        ctx.strokeStyle = '#FFA000';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Checkmark
+        ctx.fillStyle = '#2E7D32';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('✓', 90, 42);
+      }
+
+      // Generate all icon sizes
+      ['16', '32', '48', '128'].forEach((size) => {
+        const canvas = document.getElementById('icon' + size);
+        drawIcon(canvas, parseInt(size));
+      });
     </script>
-</body>
+  </body>
 </html>

@@ -7,13 +7,16 @@
 ## 功能特性
 
 ### 1. 实时记录
+
 - 自动记录每次URL净化操作
 - 显示原始URL和被移除的参数
 - 显示网站图标（favicon）
 - 显示净化时间
 
 ### 2. 详细信息
+
 每条日志记录包含：
+
 - **网站图标**：自动获取网站的 favicon
 - **域名**：被净化的网站域名
 - **原始URL**：完整的原始URL（支持悬停查看）
@@ -21,6 +24,7 @@
 - **时间戳**：净化发生的时间（相对时间显示）
 
 ### 3. 日志管理
+
 - **自动限制**：只保留最新的100条记录
 - **清空日志**：一键清空所有日志记录
 - **刷新日志**：手动刷新日志列表
@@ -234,11 +238,13 @@ updateCleaningLogUI() {
 ### 问题1：日志不显示
 
 **可能原因**：
+
 - 扩展被禁用
 - 网站在白名单中
 - URL没有跟踪参数
 
 **解决方案**：
+
 1. 检查扩展是否启用
 2. 检查网站是否在白名单中
 3. 访问带有跟踪参数的URL
@@ -246,20 +252,24 @@ updateCleaningLogUI() {
 ### 问题2：日志显示不完整
 
 **可能原因**：
+
 - 日志数量超过100条
 - 存储空间不足
 
 **解决方案**：
+
 1. 清空旧日志
 2. 检查浏览器存储空间
 
 ### 问题3：favicon不显示
 
 **可能原因**：
+
 - 网站没有favicon
 - Google favicon服务不可用
 
 **解决方案**：
+
 - 这是正常现象，不影响功能
 - favicon会自动隐藏（onerror处理）
 
@@ -321,20 +331,20 @@ handleTabUpdate() 处理
 
 ```javascript
 // 获取日志
-chrome.runtime.sendMessage({ action: 'getCleaningLog' })
+chrome.runtime.sendMessage({ action: 'getCleaningLog' });
 
 // 清空日志
-chrome.runtime.sendMessage({ action: 'clearCleaningLog' })
+chrome.runtime.sendMessage({ action: 'clearCleaningLog' });
 ```
 
 **Background → Popup**
 
 ```javascript
 // 返回日志数据
-sendResponse({ cleaningLog: this.cleaningLog })
+sendResponse({ cleaningLog: this.cleaningLog });
 
 // 返回操作结果
-sendResponse({ success: true })
+sendResponse({ success: true });
 ```
 
 ## 文件修改清单

@@ -9,6 +9,7 @@ URL Cleaner Extension provides a modular architecture for URL processing and pri
 ### Background Script API
 
 #### URL Cleaning
+
 ```javascript
 // Main URL cleaning function
 function cleanUrl(url, options = {}) {
@@ -17,12 +18,12 @@ function cleanUrl(url, options = {}) {
   // - options: Object - Configuration options
   //   - preserveHash: Boolean - Keep URL fragments
   //   - customRules: Array - Additional parameters to remove
-  
   // Returns: String - Cleaned URL
 }
 ```
 
 #### Rule Management
+
 ```javascript
 // Add custom cleaning rule
 function addCleaningRule(domain, parameters) {
@@ -46,6 +47,7 @@ function getCleaningRules() {
 ### Storage API
 
 #### Settings Management
+
 ```javascript
 // Get extension settings
 chrome.storage.sync.get(['settings'], (result) => {
@@ -57,19 +59,20 @@ chrome.storage.sync.set({
   settings: {
     enabled: true,
     showNotifications: false,
-    customRules: []
-  }
+    customRules: [],
+  },
 });
 ```
 
 #### Statistics API
+
 ```javascript
 // Get cleaning statistics
 chrome.storage.local.get(['stats'], (result) => {
   const stats = result.stats || {
     totalCleaned: 0,
     parametersRemoved: 0,
-    sessionsActive: 0
+    sessionsActive: 0,
   };
 });
 ```
@@ -77,14 +80,18 @@ chrome.storage.local.get(['stats'], (result) => {
 ### Messaging API
 
 #### Extension Communication
+
 ```javascript
 // Send message to background script
-chrome.runtime.sendMessage({
-  action: 'cleanUrl',
-  url: 'https://example.com?utm_source=test'
-}, (response) => {
-  console.log('Cleaned URL:', response.cleanedUrl);
-});
+chrome.runtime.sendMessage(
+  {
+    action: 'cleanUrl',
+    url: 'https://example.com?utm_source=test',
+  },
+  (response) => {
+    console.log('Cleaned URL:', response.cleanedUrl);
+  }
+);
 
 // Listen for messages
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -94,7 +101,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       break;
     case 'updateSettings':
       updateSettings(message.settings);
-      sendResponse({success: true});
+      sendResponse({ success: true });
       break;
   }
 });
@@ -103,32 +110,35 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 ## Configuration Schema
 
 ### Settings Object
+
 ```javascript
 const settingsSchema = {
-  enabled: Boolean,           // Extension enabled/disabled
+  enabled: Boolean, // Extension enabled/disabled
   showNotifications: Boolean, // Show cleaning notifications
-  customRules: Array,        // User-defined rules
-  whitelist: Array,          // Exempt domains
+  customRules: Array, // User-defined rules
+  whitelist: Array, // Exempt domains
   statistics: {
-    enabled: Boolean,        // Track statistics
-    retention: Number        // Days to keep stats
-  }
+    enabled: Boolean, // Track statistics
+    retention: Number, // Days to keep stats
+  },
 };
 ```
 
 ### Rule Definition
+
 ```javascript
 const ruleSchema = {
-  domain: String,           // Target domain
-  parameters: Array,        // Parameters to remove
-  enabled: Boolean,         // Rule active status
-  description: String       // Human-readable description
+  domain: String, // Target domain
+  parameters: Array, // Parameters to remove
+  enabled: Boolean, // Rule active status
+  description: String, // Human-readable description
 };
 ```
 
 ## Event System
 
 ### Extension Events
+
 ```javascript
 // URL cleaned event
 chrome.runtime.sendMessage({
@@ -136,8 +146,8 @@ chrome.runtime.sendMessage({
   data: {
     originalUrl: 'https://example.com?utm_source=test',
     cleanedUrl: 'https://example.com',
-    parametersRemoved: ['utm_source']
-  }
+    parametersRemoved: ['utm_source'],
+  },
 });
 
 // Settings changed event
@@ -145,14 +155,15 @@ chrome.runtime.sendMessage({
   type: 'SETTINGS_CHANGED',
   data: {
     oldSettings: previousSettings,
-    newSettings: currentSettings
-  }
+    newSettings: currentSettings,
+  },
 });
 ```
 
 ## Utility Functions
 
 ### URL Processing
+
 ```javascript
 // Extract parameters from URL
 function getUrlParameters(url) {
@@ -163,13 +174,13 @@ function getUrlParameters(url) {
 // Check if parameter is tracking parameter
 function isTrackingParameter(param) {
   const trackingPatterns = [
-    /^utm_/,     // Google Analytics
-    /^fbclid/,   // Facebook
-    /^gclid/,    // Google Ads
-    /^ref/       // General referral
+    /^utm_/, // Google Analytics
+    /^fbclid/, // Facebook
+    /^gclid/, // Google Ads
+    /^ref/, // General referral
   ];
-  
-  return trackingPatterns.some(pattern => pattern.test(param));
+
+  return trackingPatterns.some((pattern) => pattern.test(param));
 }
 
 // Validate URL format
@@ -184,15 +195,20 @@ function isValidUrl(url) {
 ```
 
 ### Data Management
+
 ```javascript
 // Export extension data
 function exportSettings() {
-  return chrome.storage.sync.get(null).then(data => {
-    return JSON.stringify({
-      ...data,
-      exportDate: new Date().toISOString(),
-      version: chrome.runtime.getManifest().version
-    }, null, 2);
+  return chrome.storage.sync.get(null).then((data) => {
+    return JSON.stringify(
+      {
+        ...data,
+        exportDate: new Date().toISOString(),
+        version: chrome.runtime.getManifest().version,
+      },
+      null,
+      2
+    );
   });
 }
 
@@ -211,6 +227,7 @@ function importSettings(jsonData) {
 ## Error Handling
 
 ### Error Types
+
 ```javascript
 class UrlCleaningError extends Error {
   constructor(message, url) {
@@ -229,6 +246,7 @@ class StorageError extends Error {
 ```
 
 ### Error Recovery
+
 ```javascript
 function safeCleanUrl(url) {
   try {
@@ -244,6 +262,7 @@ function safeCleanUrl(url) {
 ## Performance Considerations
 
 ### Optimization Strategies
+
 ```javascript
 // Cache compiled regex patterns
 const parameterPatterns = new Map();
@@ -257,37 +276,39 @@ function getParameterPattern(param) {
 
 // Batch process multiple URLs
 function cleanUrlsBatch(urls) {
-  return Promise.all(urls.map(url => 
-    new Promise(resolve => {
-      setTimeout(() => resolve(cleanUrl(url)), 0);
-    })
-  ));
+  return Promise.all(
+    urls.map(
+      (url) =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(cleanUrl(url)), 0);
+        })
+    )
+  );
 }
 ```
 
 ## Browser Compatibility
 
 ### Feature Support Matrix
-| Feature | Chrome | Firefox | Edge | Safari |
-|---------|--------|---------|------|--------|
-| Core Cleaning | ✅ | ✅ | ✅ | ❌ |
-| Background Scripts | ✅ | ✅ | ✅ | ❌ |
-| Storage Sync | ✅ | ✅ | ✅ | ❌ |
-| Import/Export | ✅ | ✅ | ✅ | ❌ |
+
+| Feature            | Chrome | Firefox | Edge | Safari |
+| ------------------ | ------ | ------- | ---- | ------ |
+| Core Cleaning      | ✅     | ✅      | ✅   | ❌     |
+| Background Scripts | ✅     | ✅      | ✅   | ❌     |
+| Storage Sync       | ✅     | ✅      | ✅   | ❌     |
+| Import/Export      | ✅     | ✅      | ✅   | ❌     |
 
 ### Compatibility Checks
+
 ```javascript
 // Check for required APIs
 function checkBrowserSupport() {
-  const requiredAPIs = [
-    'chrome.runtime',
-    'chrome.storage',
-    'chrome.tabs'
-  ];
-  
-  return requiredAPIs.every(api => 
-    typeof chrome !== 'undefined' && 
-    api.split('.').reduce((obj, prop) => obj && obj[prop], window)
+  const requiredAPIs = ['chrome.runtime', 'chrome.storage', 'chrome.tabs'];
+
+  return requiredAPIs.every(
+    (api) =>
+      typeof chrome !== 'undefined' &&
+      api.split('.').reduce((obj, prop) => obj && obj[prop], window)
   );
 }
 ```
@@ -295,25 +316,27 @@ function checkBrowserSupport() {
 ## Testing API
 
 ### Mock Objects
+
 ```javascript
 // Mock Chrome APIs for testing
 global.chrome = {
   runtime: {
     sendMessage: jest.fn(),
     onMessage: {
-      addListener: jest.fn()
-    }
+      addListener: jest.fn(),
+    },
   },
   storage: {
     sync: {
       get: jest.fn(),
-      set: jest.fn()
-    }
-  }
+      set: jest.fn(),
+    },
+  },
 };
 ```
 
 ### Test Utilities
+
 ```javascript
 // Create test URL with tracking parameters
 function createTestUrl(base, params) {
@@ -334,6 +357,7 @@ function expectUrlCleaned(original, expected) {
 ## Extension Lifecycle
 
 ### Installation
+
 ```javascript
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
@@ -347,6 +371,7 @@ chrome.runtime.onInstalled.addListener((details) => {
 ```
 
 ### Uninstallation
+
 ```javascript
 chrome.runtime.setUninstallURL('https://example.com/feedback');
 

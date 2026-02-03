@@ -1,166 +1,172 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ClearURL</title>
-  <link rel="stylesheet" href="popup.css">
-</head>
-<body>
-  <div class="popup-container">
-    <header class="popup-header">
-      <div class="logo">
-        <img src="icons/icon32.png" alt="ClearURL" onerror="this.style.display='none'">
-        <h1>ClearURL</h1>
-      </div>
-      <div class="toggle-container">
-        <label class="toggle">
-          <input type="checkbox" id="enableToggle">
-          <span class="slider"></span>
-        </label>
-      </div>
-    </header>
-
-    <!-- 标签页导航 -->
-    <nav class="popup-tabs">
-      <button class="popup-tab-btn active" data-tab="overview">概览</button>
-      <button class="popup-tab-btn" data-tab="whitelist">白名单</button>
-      <button class="popup-tab-btn" data-tab="custom-rules">自定义规则</button>
-      <button class="popup-tab-btn" data-tab="cleaning-log">净化日志</button>
-    </nav>
-
-    <!-- 概览标签页 -->
-    <div class="popup-tab-content active" id="overview">
-      <div class="stats-section">
-        <div class="stat-card">
-          <div class="stat-number" id="totalCleaned">0</div>
-          <div class="stat-label">URLs Cleaned</div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ClearURL</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="popup-container">
+      <header class="popup-header">
+        <div class="logo">
+          <img src="icons/icon32.png" alt="ClearURL" onerror="this.style.display='none'" />
+          <h1>ClearURL</h1>
         </div>
-        <div class="stat-card">
-          <div class="stat-number" id="parametersRemoved">0</div>
-          <div class="stat-label">Parameters Removed</div>
+        <div class="toggle-container">
+          <label class="toggle">
+            <input type="checkbox" id="enableToggle" />
+            <span class="slider"></span>
+          </label>
         </div>
-      </div>
+      </header>
 
-      <div class="section">
-        <h3>Recent Activity</h3>
-        <div class="activity-list" id="activityList">
-          <div class="no-activity">No recent activity</div>
+      <!-- 标签页导航 -->
+      <nav class="popup-tabs">
+        <button class="popup-tab-btn active" data-tab="overview">概览</button>
+        <button class="popup-tab-btn" data-tab="whitelist">白名单</button>
+        <button class="popup-tab-btn" data-tab="custom-rules">自定义规则</button>
+        <button class="popup-tab-btn" data-tab="cleaning-log">净化日志</button>
+      </nav>
+
+      <!-- 概览标签页 -->
+      <div class="popup-tab-content active" id="overview">
+        <div class="stats-section">
+          <div class="stat-card">
+            <div class="stat-number" id="totalCleaned">0</div>
+            <div class="stat-label">URLs Cleaned</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number" id="parametersRemoved">0</div>
+            <div class="stat-label">Parameters Removed</div>
+          </div>
         </div>
-      </div>
 
-      <div class="section">
-        <h3>高级功能</h3>
-        <div class="feature-toggles">
-          <div class="feature-toggle">
-            <div class="feature-info">
-              <span class="feature-name">自动净化剪贴板</span>
-              <span class="feature-desc">复制链接时自动净化跟踪参数</span>
+        <div class="section">
+          <h3>Recent Activity</h3>
+          <div class="activity-list" id="activityList">
+            <div class="no-activity">No recent activity</div>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3>高级功能</h3>
+          <div class="feature-toggles">
+            <div class="feature-toggle">
+              <div class="feature-info">
+                <span class="feature-name">自动净化剪贴板</span>
+                <span class="feature-desc">复制链接时自动净化跟踪参数</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="clipboardCleaningToggle" />
+                <span class="slider"></span>
+              </label>
             </div>
-            <label class="toggle">
-              <input type="checkbox" id="clipboardCleaningToggle">
-              <span class="slider"></span>
-            </label>
-          </div>
-          <div class="feature-toggle">
-            <div class="feature-info">
-              <span class="feature-name">短链接预解析</span>
-              <span class="feature-desc">自动展开并净化短链接</span>
+            <div class="feature-toggle">
+              <div class="feature-info">
+                <span class="feature-name">短链接预解析</span>
+                <span class="feature-desc">自动展开并净化短链接</span>
+              </div>
+              <label class="toggle">
+                <input type="checkbox" id="shortUrlExpansionToggle" />
+                <span class="slider"></span>
+              </label>
             </div>
-            <label class="toggle">
-              <input type="checkbox" id="shortUrlExpansionToggle">
-              <span class="slider"></span>
-            </label>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="clearStats" class="action-btn secondary">Clear Statistics</button>
+          <button id="openOptions" class="action-btn primary">Settings</button>
+        </div>
+
+        <div class="current-site">
+          <div class="site-info">
+            <span class="site-url" id="currentSite">example.com</span>
+            <button id="whitelistBtn" class="whitelist-btn">
+              <span class="whitelist-text">Add to Whitelist</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <div class="actions">
-        <button id="clearStats" class="action-btn secondary">
-          Clear Statistics
-        </button>
-        <button id="openOptions" class="action-btn primary">
-          Settings
-        </button>
+      <!-- 白名单标签页 -->
+      <div class="popup-tab-content" id="whitelist">
+        <div class="section">
+          <h3>白名单管理</h3>
+          <p class="section-description">添加到白名单的网站将不会被净化URL参数</p>
+
+          <div class="input-group">
+            <input
+              type="text"
+              id="whitelistInput"
+              placeholder="输入域名 (例如: example.com)"
+              class="text-input"
+            />
+            <button id="addWhitelistBtn" class="action-btn primary">添加</button>
+          </div>
+
+          <div class="list-container">
+            <div class="list-header">
+              <span>已添加的白名单 (<span id="whitelistCount">0</span>)</span>
+            </div>
+            <div class="item-list" id="whitelistList">
+              <div class="no-items">暂无白名单网站</div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div class="current-site">
-        <div class="site-info">
-          <span class="site-url" id="currentSite">example.com</span>
-          <button id="whitelistBtn" class="whitelist-btn">
-            <span class="whitelist-text">Add to Whitelist</span>
-          </button>
+      <!-- 自定义规则标签页 -->
+      <div class="popup-tab-content" id="custom-rules">
+        <div class="section">
+          <h3>自定义规则管理</h3>
+          <p class="section-description">添加自定义的URL参数以进行净化</p>
+
+          <div class="input-group">
+            <input
+              type="text"
+              id="customRuleInput"
+              placeholder="输入参数名 (例如: utm_custom)"
+              class="text-input"
+            />
+            <button id="addCustomRuleBtn" class="action-btn primary">添加</button>
+          </div>
+
+          <div class="list-container">
+            <div class="list-header">
+              <span>自定义参数 (<span id="customRulesCount">0</span>)</span>
+            </div>
+            <div class="item-list" id="customRulesList">
+              <div class="no-items">暂无自定义规则</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 净化日志标签页 -->
+      <div class="popup-tab-content" id="cleaning-log">
+        <div class="section">
+          <h3>净化日志</h3>
+          <p class="section-description">查看最近的URL净化记录</p>
+
+          <div class="log-actions">
+            <button id="clearLogBtn" class="action-btn secondary">清空日志</button>
+            <button id="refreshLogBtn" class="action-btn secondary">刷新</button>
+          </div>
+
+          <div class="log-container">
+            <div class="log-header">
+              <span>最近净化记录 (<span id="logCount">0</span>)</span>
+            </div>
+            <div class="log-list" id="cleaningLogList">
+              <div class="no-items">暂无净化记录</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- 白名单标签页 -->
-    <div class="popup-tab-content" id="whitelist">
-      <div class="section">
-        <h3>白名单管理</h3>
-        <p class="section-description">添加到白名单的网站将不会被净化URL参数</p>
-
-        <div class="input-group">
-          <input type="text" id="whitelistInput" placeholder="输入域名 (例如: example.com)" class="text-input">
-          <button id="addWhitelistBtn" class="action-btn primary">添加</button>
-        </div>
-
-        <div class="list-container">
-          <div class="list-header">
-            <span>已添加的白名单 (<span id="whitelistCount">0</span>)</span>
-          </div>
-          <div class="item-list" id="whitelistList">
-            <div class="no-items">暂无白名单网站</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 自定义规则标签页 -->
-    <div class="popup-tab-content" id="custom-rules">
-      <div class="section">
-        <h3>自定义规则管理</h3>
-        <p class="section-description">添加自定义的URL参数以进行净化</p>
-
-        <div class="input-group">
-          <input type="text" id="customRuleInput" placeholder="输入参数名 (例如: utm_custom)" class="text-input">
-          <button id="addCustomRuleBtn" class="action-btn primary">添加</button>
-        </div>
-
-        <div class="list-container">
-          <div class="list-header">
-            <span>自定义参数 (<span id="customRulesCount">0</span>)</span>
-          </div>
-          <div class="item-list" id="customRulesList">
-            <div class="no-items">暂无自定义规则</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 净化日志标签页 -->
-    <div class="popup-tab-content" id="cleaning-log">
-      <div class="section">
-        <h3>净化日志</h3>
-        <p class="section-description">查看最近的URL净化记录</p>
-
-        <div class="log-actions">
-          <button id="clearLogBtn" class="action-btn secondary">清空日志</button>
-          <button id="refreshLogBtn" class="action-btn secondary">刷新</button>
-        </div>
-
-        <div class="log-container">
-          <div class="log-header">
-            <span>最近净化记录 (<span id="logCount">0</span>)</span>
-          </div>
-          <div class="log-list" id="cleaningLogList">
-            <div class="no-items">暂无净化记录</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="popup.js"></script>
-</body>
+    <script src="popup.js"></script>
+  </body>
 </html>

@@ -194,10 +194,11 @@ class ClearURLService {
 
   // 性能优化：重建自定义规则的正则表达式
   rebuildCustomRulePatterns() {
-    this.customRulePatterns = this.customRules.map(rule => new RegExp(`^${rule}$`));
-    this.allPatterns = this.customRulePatterns.length > 0
-      ? this.trackingPatterns.concat(this.customRulePatterns)
-      : this.trackingPatterns;
+    this.customRulePatterns = this.customRules.map((rule) => new RegExp(`^${rule}$`));
+    this.allPatterns =
+      this.customRulePatterns.length > 0
+        ? this.trackingPatterns.concat(this.customRulePatterns)
+        : this.trackingPatterns;
   }
 
   async saveSettings() {
@@ -237,7 +238,7 @@ class ClearURLService {
     try {
       // 1. 获取所有现有的动态规则并删除
       const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
-      const removeRuleIds = existingRules.map(rule => rule.id);
+      const removeRuleIds = existingRules.map((rule) => rule.id);
 
       if (removeRuleIds.length > 0) {
         await chrome.declarativeNetRequest.updateDynamicRules({
@@ -260,9 +261,10 @@ class ClearURLService {
       // 4. 处理静态规则，添加白名单排除
       for (const staticRule of this.staticRules) {
         // 性能优化：使用 structuredClone 替代 JSON 深拷贝
-        const rule = typeof structuredClone === 'function'
-          ? structuredClone(staticRule)
-          : JSON.parse(JSON.stringify(staticRule));
+        const rule =
+          typeof structuredClone === 'function'
+            ? structuredClone(staticRule)
+            : JSON.parse(JSON.stringify(staticRule));
         rule.id = ruleId++;
 
         // 如果有白名单，添加到规则的 condition 中
@@ -372,7 +374,7 @@ class ClearURLService {
       this.stats.totalCleaned++;
       this.stats.parametersRemoved += this.countRemovedParameters(
         originalParams,
-        new URL(cleanedUrl).search,
+        new URL(cleanedUrl).search
       );
 
       const processingTime = performance.now() - startTime;
@@ -392,7 +394,7 @@ class ClearURLService {
       const params = new URLSearchParams(urlObj.search);
 
       for (const [key] of params) {
-        const shouldRemove = this.allPatterns.some(pattern => {
+        const shouldRemove = this.allPatterns.some((pattern) => {
           if (pattern instanceof RegExp) {
             return pattern.test(key);
           }
@@ -426,7 +428,7 @@ class ClearURLService {
       timestamp: Date.now(),
       parametersRemoved: this.countRemovedParameters(
         new URL(originalUrl).search,
-        new URL(cleanedUrl).search,
+        new URL(cleanedUrl).search
       ),
     };
 
@@ -436,7 +438,8 @@ class ClearURLService {
     }
   }
 
-  async handleTabUpdate(tabId, changeInfo, tab) {
+  // eslint-disable-next-line no-unused-vars
+  async handleTabUpdate(tabId, changeInfo, _tab) {
     // 只处理 URL 变化的事件
     if (!changeInfo.url || !this.isEnabled) {
       return;
@@ -497,132 +500,132 @@ class ClearURLService {
 
   async handleMessage(message, sender, sendResponse) {
     switch (message.action) {
-    case 'getStats':
-      sendResponse({
-        stats: this.stats,
-        performanceStats: this.performanceStats,
-        recentCleanups: this.recentCleanups,
-        isEnabled: this.isEnabled,
-      });
-      break;
+      case 'getStats':
+        sendResponse({
+          stats: this.stats,
+          performanceStats: this.performanceStats,
+          recentCleanups: this.recentCleanups,
+          isEnabled: this.isEnabled,
+        });
+        break;
 
-    case 'toggleEnabled':
-      this.isEnabled = !this.isEnabled;
-      await this.updateRules();
-      await this.saveSettings();
-      this.updateBadge();
-      sendResponse({ isEnabled: this.isEnabled });
-      break;
-
-    case 'addToWhitelist':
-      if (message.hostname) {
-        this.whitelist.add(message.hostname);
+      case 'toggleEnabled':
+        this.isEnabled = !this.isEnabled;
         await this.updateRules();
         await this.saveSettings();
-      }
-      sendResponse({ success: true });
-      break;
+        this.updateBadge();
+        sendResponse({ isEnabled: this.isEnabled });
+        break;
 
-    case 'removeFromWhitelist':
-      if (message.hostname) {
-        this.whitelist.delete(message.hostname);
-        await this.updateRules();
+      case 'addToWhitelist':
+        if (message.hostname) {
+          this.whitelist.add(message.hostname);
+          await this.updateRules();
+          await this.saveSettings();
+        }
+        sendResponse({ success: true });
+        break;
+
+      case 'removeFromWhitelist':
+        if (message.hostname) {
+          this.whitelist.delete(message.hostname);
+          await this.updateRules();
+          await this.saveSettings();
+        }
+        sendResponse({ success: true });
+        break;
+
+      case 'getWhitelist':
+        sendResponse({ whitelist: Array.from(this.whitelist) });
+        break;
+
+      case 'addCustomRule':
+        if (message.rule && !this.customRules.includes(message.rule)) {
+          this.customRules.push(message.rule);
+          this.rebuildCustomRulePatterns();
+          await this.updateRules();
+          await this.saveSettings();
+        }
+        sendResponse({ success: true });
+        break;
+
+      case 'removeCustomRule':
+        if (message.rule) {
+          this.customRules = this.customRules.filter((r) => r !== message.rule);
+          this.rebuildCustomRulePatterns();
+          await this.updateRules();
+          await this.saveSettings();
+        }
+        sendResponse({ success: true });
+        break;
+
+      case 'getCustomRules':
+        sendResponse({ customRules: this.customRules });
+        break;
+
+      case 'clearStats':
+        this.stats = { totalCleaned: 0, parametersRemoved: 0, sessionsCleared: 0 };
+        this.performanceStats = {
+          averageProcessingTime: 0,
+          totalProcessed: 0,
+          memoryUsage: 0,
+          lastCleanup: Date.now(),
+        };
+        this.recentCleanups = [];
         await this.saveSettings();
-      }
-      sendResponse({ success: true });
-      break;
+        this.updateBadge();
+        sendResponse({ success: true });
+        break;
 
-    case 'getWhitelist':
-      sendResponse({ whitelist: Array.from(this.whitelist) });
-      break;
+      case 'getCleaningLog':
+        sendResponse({ cleaningLog: this.cleaningLog });
+        break;
 
-    case 'addCustomRule':
-      if (message.rule && !this.customRules.includes(message.rule)) {
-        this.customRules.push(message.rule);
-        this.rebuildCustomRulePatterns();
-        await this.updateRules();
+      case 'clearCleaningLog':
+        this.cleaningLog = [];
         await this.saveSettings();
-      }
-      sendResponse({ success: true });
-      break;
+        sendResponse({ success: true });
+        break;
 
-    case 'removeCustomRule':
-      if (message.rule) {
-        this.customRules = this.customRules.filter(r => r !== message.rule);
-        this.rebuildCustomRulePatterns();
-        await this.updateRules();
+      case 'toggleClipboardCleaning':
+        this.clipboardCleaningEnabled = !this.clipboardCleaningEnabled;
+        // 性能优化：按需启停剪贴板监控
+        if (this.clipboardCleaningEnabled) {
+          this.startClipboardAlarm();
+        } else {
+          this.stopClipboardAlarm();
+        }
         await this.saveSettings();
-      }
-      sendResponse({ success: true });
-      break;
+        sendResponse({ enabled: this.clipboardCleaningEnabled });
+        break;
 
-    case 'getCustomRules':
-      sendResponse({ customRules: this.customRules });
-      break;
+      case 'toggleShortUrlExpansion':
+        this.shortUrlExpansionEnabled = !this.shortUrlExpansionEnabled;
+        await this.saveSettings();
+        sendResponse({ enabled: this.shortUrlExpansionEnabled });
+        break;
 
-    case 'clearStats':
-      this.stats = { totalCleaned: 0, parametersRemoved: 0, sessionsCleared: 0 };
-      this.performanceStats = {
-        averageProcessingTime: 0,
-        totalProcessed: 0,
-        memoryUsage: 0,
-        lastCleanup: Date.now(),
-      };
-      this.recentCleanups = [];
-      await this.saveSettings();
-      this.updateBadge();
-      sendResponse({ success: true });
-      break;
+      case 'getFeatureStatus':
+        sendResponse({
+          clipboardCleaningEnabled: this.clipboardCleaningEnabled,
+          shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
+        });
+        break;
 
-    case 'getCleaningLog':
-      sendResponse({ cleaningLog: this.cleaningLog });
-      break;
-
-    case 'clearCleaningLog':
-      this.cleaningLog = [];
-      await this.saveSettings();
-      sendResponse({ success: true });
-      break;
-
-    case 'toggleClipboardCleaning':
-      this.clipboardCleaningEnabled = !this.clipboardCleaningEnabled;
-      // 性能优化：按需启停剪贴板监控
-      if (this.clipboardCleaningEnabled) {
-        this.startClipboardAlarm();
-      } else {
-        this.stopClipboardAlarm();
-      }
-      await this.saveSettings();
-      sendResponse({ enabled: this.clipboardCleaningEnabled });
-      break;
-
-    case 'toggleShortUrlExpansion':
-      this.shortUrlExpansionEnabled = !this.shortUrlExpansionEnabled;
-      await this.saveSettings();
-      sendResponse({ enabled: this.shortUrlExpansionEnabled });
-      break;
-
-    case 'getFeatureStatus':
-      sendResponse({
-        clipboardCleaningEnabled: this.clipboardCleaningEnabled,
-        shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
-      });
-      break;
-
-    // 性能优化：新增批量获取数据接口，减少消息往返
-    case 'getPopupData':
-      sendResponse({
-        stats: this.stats,
-        performanceStats: this.performanceStats,
-        recentCleanups: this.recentCleanups,
-        isEnabled: this.isEnabled,
-        whitelist: Array.from(this.whitelist),
-        customRules: this.customRules,
-        cleaningLog: this.cleaningLog,
-        clipboardCleaningEnabled: this.clipboardCleaningEnabled,
-        shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
-      });
-      break;
+      // 性能优化：新增批量获取数据接口，减少消息往返
+      case 'getPopupData':
+        sendResponse({
+          stats: this.stats,
+          performanceStats: this.performanceStats,
+          recentCleanups: this.recentCleanups,
+          isEnabled: this.isEnabled,
+          whitelist: Array.from(this.whitelist),
+          customRules: this.customRules,
+          cleaningLog: this.cleaningLog,
+          clipboardCleaningEnabled: this.clipboardCleaningEnabled,
+          shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
+        });
+        break;
     }
   }
 
@@ -649,7 +652,7 @@ class ClearURLService {
     }
 
     const todayCleanups = this.recentCleanups.filter(
-      (cleanup) => Date.now() - cleanup.timestamp < 24 * 60 * 60 * 1000,
+      (cleanup) => Date.now() - cleanup.timestamp < 24 * 60 * 60 * 1000
     ).length;
 
     if (todayCleanups > 0) {
@@ -665,7 +668,8 @@ class ClearURLService {
     this.performanceStats.lastCleanup = Date.now();
 
     this.performanceStats.averageProcessingTime =
-      (this.performanceStats.averageProcessingTime * (this.performanceStats.totalProcessed - 1) + processingTime) /
+      (this.performanceStats.averageProcessingTime * (this.performanceStats.totalProcessed - 1) +
+        processingTime) /
       this.performanceStats.totalProcessed;
 
     if (performance.memory) {
@@ -731,16 +735,22 @@ class ClearURLService {
   }
 
   async monitorClipboard() {
-    if (!this.clipboardCleaningEnabled) return;
+    if (!this.clipboardCleaningEnabled) {
+      return;
+    }
 
     try {
       const text = await navigator.clipboard.readText();
 
       // 避免重复处理相同内容
-      if (text === this.lastClipboardContent) return;
+      if (text === this.lastClipboardContent) {
+        return;
+      }
 
       // 检查是否为有效URL
-      if (!this.isValidUrl(text)) return;
+      if (!this.isValidUrl(text)) {
+        return;
+      }
 
       // 净化URL
       const cleanedUrl = this.cleanUrl(text);
@@ -793,7 +803,9 @@ class ClearURLService {
         // 检查是否有重定向
         if (response.status >= 300 && response.status < 400) {
           const location = response.headers.get('Location');
-          if (!location) break;
+          if (!location) {
+            break;
+          }
 
           // 处理相对URL
           currentUrl = new URL(location, currentUrl).href;
@@ -815,8 +827,8 @@ class ClearURLService {
       const urlObj = new URL(url);
       const hostname = urlObj.hostname.toLowerCase();
 
-      return this.shortenerDomains.some(domain =>
-        hostname === domain || hostname.endsWith('.' + domain)
+      return this.shortenerDomains.some(
+        (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
       );
     } catch {
       return false;
@@ -824,8 +836,12 @@ class ClearURLService {
   }
 
   async handleShortUrlNavigation(details) {
-    if (!this.shortUrlExpansionEnabled) return;
-    if (!this.isShortUrl(details.url)) return;
+    if (!this.shortUrlExpansionEnabled) {
+      return;
+    }
+    if (!this.isShortUrl(details.url)) {
+      return;
+    }
 
     try {
       // 显示加载状态

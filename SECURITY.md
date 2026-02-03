@@ -17,6 +17,7 @@ The ClearURL team takes security vulnerabilities seriously. We appreciate your e
 Instead, please send an email to: **security-reports@protonmail.com**
 
 If you don't receive a response within 48 hours, please follow up via the backup contact method:
+
 - Create an issue with the title "Security Issue - Please Contact Privately"
 - Include minimal details and request private communication
 
@@ -43,18 +44,21 @@ Please include the following information in your report:
 ClearURL implements several security measures:
 
 #### Data Protection
+
 - **No external data transmission** - All data stays on your device
 - **Local storage only** - Settings and statistics stored locally
 - **No analytics or tracking** - The extension doesn't track users
 - **Minimal permissions** - Only requests necessary browser permissions
 
 #### Code Security
+
 - **Input validation** - All user inputs are validated and sanitized
 - **Secure APIs** - Uses modern Chrome Extension Manifest V3
 - **Regular updates** - Dependencies and security practices reviewed regularly
 - **Open source** - All code is publicly auditable
 
 #### Privacy Protection
+
 - **URL cleaning only** - Extension only modifies URLs, doesn't read page content
 - **No personal data collection** - No personal information is collected or stored
 - **User control** - Users can disable/enable features and whitelist sites
@@ -62,6 +66,7 @@ ClearURL implements several security measures:
 ### Scope
 
 This security policy applies to:
+
 - The ClearURL browser extension code
 - Official distribution channels (Chrome Web Store, Firefox Add-ons)
 - Related infrastructure and documentation
@@ -69,6 +74,7 @@ This security policy applies to:
 ### Out of Scope
 
 The following are typically out of scope:
+
 - Issues in third-party dependencies (unless directly exploitable)
 - Issues requiring physical access to a user's device
 - Issues in unsupported browsers or versions
@@ -77,6 +83,7 @@ The following are typically out of scope:
 ### Recognition
 
 We value security research and will acknowledge your contribution:
+
 - **Hall of Fame** - Recognition in our security acknowledgments
 - **Coordination** - We'll work with you on public disclosure timing
 - **Credit** - Public credit for your discovery (if desired)
@@ -84,6 +91,7 @@ We value security research and will acknowledge your contribution:
 ### Legal
 
 We commit to:
+
 - Not pursue legal action against security researchers who follow this policy
 - Work with researchers to understand and resolve issues
 - Credit researchers for their valuable contributions
@@ -111,11 +119,13 @@ ClearURL includes these security-focused features:
 ### Threat Model
 
 ClearURL protects against:
+
 - **URL-based tracking** - Removes tracking parameters from links
 - **Cross-site tracking** - Prevents parameter-based user correlation
 - **Privacy invasion** - Blocks common tracking mechanisms
 
 ClearURL does NOT protect against:
+
 - **Cookies or local storage** - Use other privacy tools for these
 - **Fingerprinting** - Browser fingerprinting requires different solutions
 - **Network-level tracking** - Use VPN or proxy for network privacy
@@ -124,10 +134,12 @@ ClearURL does NOT protect against:
 ### Contact Information
 
 For security-related matters:
+
 - **Security Email**: security-reports@protonmail.com
 - **Response Time**: Within 48 hours
 
 For general issues:
+
 - **GitHub Issues**: [Report non-security bugs](https://github.com/jymadrid/clearurl-extension/issues)
 - **Discussions**: [General questions and discussions](https://github.com/jymadrid/clearurl-extension/discussions)
 

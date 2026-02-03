@@ -38,12 +38,12 @@
 
 ## Why Choose ClearURL?
 
-| Core Philosophy          | Implementation                                                                                                                                                                                                                         |
-| :----------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Seamless Experience**  | **True power is feeling its absence.** Built on Chrome's latest `declarativeNetRequest` engine, ClearURL rewrites rules at the lowest level of network communication. This means the cleaning process is instantaneous, with zero latency and no interference, offering a silky-smooth, traceless browsing experience. |
-| **Absolute Privacy**     | **Your privacy is sacred.** All of ClearURL's operations are performed 100% on your local device. It doesn't rely on any cloud servers and will never collect, upload, or analyze any of your browsing data. Simply put, we stay out of your world. |
-| **Open Source Core**     | **Trust comes from complete transparency.** We've made our entire codebase public for developers worldwide to review, scrutinize, and contribute to. We believe that only absolute transparency can build absolute security. |
-| **Intelligent Evolution**| **As tracking technology evolves, so does our protection.** ClearURL's rule set is sourced from the collective wisdom of the global privacy community and is continuously updated. It accurately identifies and removes various parameters, from ad tracking to social sharing, ensuring effective cleaning without breaking core website functionality. |
+| Core Philosophy           | Implementation                                                                                                                                                                                                                                                                                                                                           |
+| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Seamless Experience**   | **True power is feeling its absence.** Built on Chrome's latest `declarativeNetRequest` engine, ClearURL rewrites rules at the lowest level of network communication. This means the cleaning process is instantaneous, with zero latency and no interference, offering a silky-smooth, traceless browsing experience.                                   |
+| **Absolute Privacy**      | **Your privacy is sacred.** All of ClearURL's operations are performed 100% on your local device. It doesn't rely on any cloud servers and will never collect, upload, or analyze any of your browsing data. Simply put, we stay out of your world.                                                                                                      |
+| **Open Source Core**      | **Trust comes from complete transparency.** We've made our entire codebase public for developers worldwide to review, scrutinize, and contribute to. We believe that only absolute transparency can build absolute security.                                                                                                                             |
+| **Intelligent Evolution** | **As tracking technology evolves, so does our protection.** ClearURL's rule set is sourced from the collective wisdom of the global privacy community and is continuously updated. It accurately identifies and removes various parameters, from ad tracking to social sharing, ensuring effective cleaning without breaking core website functionality. |
 
 ## ✨ Features
 
@@ -72,9 +72,11 @@
 ## 📦 Installation Guide
 
 ### **Official Store (Coming Soon)**
+
 A little more patience, and you'll be able to install it with one click from the Chrome Web Store for official convenience and security.
 
 ### **Pioneer Experience (Developer Mode)**
+
 If you can't wait to get started, you can install it from the source code:
 
 1.  **Clone the repository**
@@ -120,16 +122,19 @@ Behind ClearURL's simplicity lies powerful technology.
 ## 🎯 Use Cases
 
 ### For Privacy-Conscious Users
+
 - Remove tracking parameters from all URLs automatically
 - Share clean links without exposing tracking information
 - Monitor what parameters are being removed
 
 ### For Power Users
+
 - Create custom rules for specific tracking parameters
 - Whitelist trusted websites
 - Expand short links to see final destinations before visiting
 
 ### For Developers
+
 - Understand URL structure and tracking mechanisms
 - Test URL cleaning rules
 - Contribute to the open-source project

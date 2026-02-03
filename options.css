@@ -16,7 +16,7 @@ body {
   margin: 0 auto;
   background: white;
   min-height: 100vh;
-  box-shadow: 0 0 20px rgba(0,0,0,0.1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
 }
 
 .header {
@@ -46,7 +46,7 @@ body {
 }
 
 .version {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   padding: 4px 12px;
   border-radius: 12px;
   font-size: 12px;
@@ -78,8 +78,8 @@ body {
 }
 
 .tab-btn.active {
-  color: #4CAF50;
-  border-bottom-color: #4CAF50;
+  color: #4caf50;
+  border-bottom-color: #4caf50;
   background: #f8fff9;
 }
 
@@ -129,7 +129,7 @@ body {
   margin-bottom: 8px;
 }
 
-.setting-label input[type="checkbox"] {
+.setting-label input[type='checkbox'] {
   display: none;
 }
 
@@ -145,8 +145,8 @@ body {
 }
 
 .setting-label input:checked + .checkmark {
-  background: #4CAF50;
-  border-color: #4CAF50;
+  background: #4caf50;
+  border-color: #4caf50;
 }
 
 .setting-label input:checked + .checkmark::after {
@@ -239,13 +239,15 @@ body {
   color: #2c3e50;
 }
 
-.add-rule, .add-whitelist {
+.add-rule,
+.add-whitelist {
   display: flex;
   gap: 12px;
   margin-bottom: 16px;
 }
 
-.add-rule input, .add-whitelist input {
+.add-rule input,
+.add-whitelist input {
   flex: 1;
   padding: 10px 12px;
   border: 1px solid #d0d7de;
@@ -264,7 +266,7 @@ body {
 }
 
 .btn.primary {
-  background: #4CAF50;
+  background: #4caf50;
   color: white;
 }
 
@@ -347,13 +349,13 @@ body {
   border-radius: 8px;
   padding: 24px;
   text-align: center;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stat-value {
   font-size: 32px;
   font-weight: 700;
-  color: #4CAF50;
+  color: #4caf50;
   margin-bottom: 8px;
 }
 
@@ -443,7 +445,7 @@ body {
 }
 
 .footer-links a:hover {
-  color: #4CAF50;
+  color: #4caf50;
 }
 
 .footer-text {
@@ -463,19 +465,19 @@ body {
     margin: 0;
     border-radius: 0;
   }
-  
+
   .content {
     padding: 16px;
   }
-  
+
   .header {
     padding: 16px;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .rules-list {
     grid-template-columns: 1fr;
   }
@@ -550,7 +552,8 @@ body {
   margin-bottom: 16px;
 }
 
-.original-url, .cleaned-url {
+.original-url,
+.cleaned-url {
   margin-bottom: 12px;
   padding: 12px;
   background: #f6f8fa;
@@ -566,14 +569,16 @@ body {
   border-left-color: #2da44e;
 }
 
-.original-url strong, .cleaned-url strong {
+.original-url strong,
+.cleaned-url strong {
   display: block;
   margin-bottom: 4px;
   font-size: 13px;
   color: #656d76;
 }
 
-.original-url code, .cleaned-url code {
+.original-url code,
+.cleaned-url code {
   display: block;
   word-break: break-all;
   font-size: 12px;
@@ -649,7 +654,7 @@ body {
   .test-input-group {
     flex-direction: column;
   }
-  
+
   .url-input {
     margin-bottom: 8px;
   }

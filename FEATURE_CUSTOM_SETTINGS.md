@@ -3,6 +3,7 @@
 ## 功能概述
 
 本次更新为 ClearURL 扩展添加了用户自定义设置功能，包括：
+
 1. **白名单管理**：允许用户将特定网站排除在URL净化范围之外
 2. **自定义规则**：允许用户添加自己的URL参数净化规则
 
@@ -11,6 +12,7 @@
 ### 1. 用户界面 (popup.html)
 
 扩展的弹出界面现在包含三个标签页：
+
 - **概览**：显示统计信息和最近活动
 - **白名单**：管理白名单网站
 - **自定义规则**：管理自定义净化参数
@@ -18,6 +20,7 @@
 ### 2. 数据存储
 
 使用 `chrome.storage.local` 持久化存储用户设置：
+
 ```javascript
 {
   "whitelist": ["docs.google.com", "partner.example.net"],
@@ -83,6 +86,7 @@ async updateRules() {
 #### 触发时机
 
 `updateRules()` 函数在以下情况下被调用：
+
 1. 扩展首次启动时（`initialize()` 中）
 2. 用户添加/删除白名单网站时
 3. 用户添加/删除自定义规则时
@@ -113,6 +117,7 @@ async updateRules() {
 ### 白名单实现
 
 白名单通过 `excludedRequestDomains` 属性实现：
+
 ```javascript
 rule.condition.excludedRequestDomains = Array.from(this.whitelist);
 ```
@@ -122,6 +127,7 @@ rule.condition.excludedRequestDomains = Array.from(this.whitelist);
 ### 自定义规则实现
 
 自定义规则通过创建一个新的 declarativeNetRequest 规则实现：
+
 ```javascript
 {
   action: {
@@ -153,16 +159,19 @@ rule.condition.excludedRequestDomains = Array.from(this.whitelist);
 ## 测试建议
 
 ### 白名单测试
+
 1. 添加一个网站到白名单
 2. 访问该网站的带有跟踪参数的URL
 3. 验证参数没有被移除
 
 ### 自定义规则测试
+
 1. 添加一个自定义参数（例如：`test_param`）
 2. 访问包含该参数的URL（例如：`https://example.com?test_param=123&other=456`）
 3. 验证 `test_param` 被移除，但 `other` 保留
 
 ### 组合测试
+
 1. 添加白名单和自定义规则
 2. 验证白名单网站不受自定义规则影响
 3. 验证非白名单网站应用自定义规则

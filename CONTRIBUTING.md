@@ -26,6 +26,7 @@ Thank you for your interest in contributing to ClearURL! This document provides 
 ### Contributing Code
 
 #### Prerequisites
+
 - Familiarity with JavaScript, HTML, CSS
 - Understanding of Chrome Extension APIs
 - Git and GitHub knowledge
@@ -33,12 +34,14 @@ Thank you for your interest in contributing to ClearURL! This document provides 
 #### Setup Development Environment
 
 1. **Fork the repository**
+
    ```bash
    git clone https://github.com/jymadrid/clearurl-extension.git
    cd clearurl-extension
    ```
 
 2. **Install dependencies** (if package.json exists)
+
    ```bash
    npm install
    ```
@@ -52,6 +55,7 @@ Thank you for your interest in contributing to ClearURL! This document provides 
 #### Making Changes
 
 1. **Create a feature branch**
+
    ```bash
    git checkout -b feature/your-feature-name
    ```
@@ -75,6 +79,7 @@ Thank you for your interest in contributing to ClearURL! This document provides 
 #### Commit Message Guidelines
 
 Use conventional commit format:
+
 - `feat:` - New features
 - `fix:` - Bug fixes
 - `docs:` - Documentation changes
@@ -84,6 +89,7 @@ Use conventional commit format:
 - `chore:` - Maintenance tasks
 
 Examples:
+
 - `feat: add custom rule validation`
 - `fix: resolve popup display issue on Firefox`
 - `docs: update installation instructions`
@@ -102,6 +108,7 @@ Examples:
 ## 📋 Code Style Guidelines
 
 ### JavaScript
+
 - Use ES6+ features (async/await, arrow functions, etc.)
 - Use meaningful variable and function names
 - Add JSDoc comments for functions
@@ -109,12 +116,14 @@ Examples:
 - Follow existing patterns in the codebase
 
 ### HTML/CSS
+
 - Use semantic HTML elements
 - Follow BEM methodology for CSS classes
 - Ensure responsive design
 - Maintain accessibility standards
 
 ### Code Example
+
 ```javascript
 /**
  * Adds a new tracking parameter to the custom rules
@@ -126,7 +135,7 @@ async function addCustomRule(parameter) {
     if (!this.validateParameter(parameter)) {
       throw new Error('Invalid parameter format');
     }
-    
+
     this.customRules.push(parameter);
     await this.saveSettings();
     return true;
@@ -140,6 +149,7 @@ async function addCustomRule(parameter) {
 ## 🧪 Testing
 
 ### Manual Testing Checklist
+
 - [ ] Extension loads without errors
 - [ ] Popup interface displays correctly
 - [ ] Settings page functions properly
@@ -149,7 +159,9 @@ async function addCustomRule(parameter) {
 - [ ] Custom rules can be added/removed
 
 ### Test URLs
+
 Use these URLs to test the extension:
+
 ```
 https://example.com?utm_source=test&utm_medium=email&utm_campaign=newsletter
 https://example.com?fbclid=test123&gclid=test456
@@ -191,6 +203,7 @@ When adding new tracking parameters:
 ## 🎯 Project Goals
 
 When contributing, keep these project goals in mind:
+
 - **Privacy-first**: Protect user data and browsing habits
 - **Performance**: Minimize impact on browsing speed
 - **Usability**: Keep the interface simple and intuitive
