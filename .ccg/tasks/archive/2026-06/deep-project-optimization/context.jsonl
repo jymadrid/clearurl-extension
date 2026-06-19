@@ -1,0 +1,4 @@
+{"path":"background.js","reason":"Runtime URL cleaning service, dynamic DNR rules, storage synchronization, clipboard alarm"}
+{"path":"options.js","reason":"Options-page settings persistence and background update flow"}
+{"path":"tests/background.test.js","reason":"New runtime behavior tests for ClearURLService"}
+{"path":"package.json","reason":"Repeatable web-ext build and package ignore configuration"}

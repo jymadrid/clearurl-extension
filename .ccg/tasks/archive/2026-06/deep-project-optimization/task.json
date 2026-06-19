@@ -1,0 +1,12 @@
+{
+  "id": "deep-project-optimization",
+  "title": "Deeply optimize the ClearURL open source extension project",
+  "status": "in_progress",
+  "complexity": "L+",
+  "risk": "medium",
+  "domain": "extension",
+  "currentPhase": "completed",
+  "nextAction": "Archive task",
+  "createdAt": "2026-06-19T00:00:00+08:00",
+  "branch": "main"
+}
