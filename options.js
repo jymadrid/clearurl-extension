@@ -100,7 +100,7 @@ class OptionsManager {
 
   async loadSettings() {
     try {
-      const data = await chrome.storage.sync.get([
+      const settingKeys = [
         'isEnabled',
         'showNotifications',
         'logActivity',
@@ -109,7 +109,10 @@ class OptionsManager {
         'stats',
         'recentCleanups',
         'whitelist',
-      ]);
+      ];
+      const localData = await chrome.storage.local.get(settingKeys);
+      const syncData = chrome.storage.sync ? await chrome.storage.sync.get(settingKeys) : {};
+      const data = { ...syncData, ...localData };
 
       this.settings.extensionEnabled = data.isEnabled !== false;
       this.settings.showNotifications = data.showNotifications !== false;
@@ -127,12 +130,29 @@ class OptionsManager {
 
   async saveSettings() {
     try {
-      await chrome.storage.sync.set({
+      await chrome.storage.local.set({
         isEnabled: this.settings.extensionEnabled,
         showNotifications: this.settings.showNotifications,
         logActivity: this.settings.logActivity,
         customRules: this.settings.customRules,
         disabledRules: Array.from(this.settings.disabledRules),
+      });
+      if (chrome.storage.sync) {
+        await chrome.storage.sync.set({
+          isEnabled: this.settings.extensionEnabled,
+          showNotifications: this.settings.showNotifications,
+          logActivity: this.settings.logActivity,
+          customRules: this.settings.customRules,
+          disabledRules: Array.from(this.settings.disabledRules),
+        });
+      }
+      await chrome.runtime.sendMessage({
+        action: 'updateSettings',
+        settings: {
+          isEnabled: this.settings.extensionEnabled,
+          customRules: this.settings.customRules,
+          whitelist: this.whitelist,
+        },
       });
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -256,7 +276,7 @@ class OptionsManager {
                ${!this.settings.disabledRules.has(rule) ? 'checked' : ''} 
                onchange="optionsManager.toggleRule('${rule}', this.checked)">
       </div>
-    `
+    `,
       )
       .join('');
   }
@@ -275,7 +295,7 @@ class OptionsManager {
         <span>${rule}</span>
         <button class="rule-remove" onclick="optionsManager.removeCustomRule('${rule}')">&times;</button>
       </div>
-    `
+    `,
       )
       .join('');
   }
@@ -294,20 +314,20 @@ class OptionsManager {
         <span class="whitelist-domain">${domain}</span>
         <button class="whitelist-remove" onclick="optionsManager.removeWhitelistItem('${domain}')">Remove</button>
       </div>
-    `
+    `,
       )
       .join('');
   }
 
   renderStats() {
     document.getElementById('totalCleanedStat').textContent = this.formatNumber(
-      this.stats.totalCleaned
+      this.stats.totalCleaned,
     );
     document.getElementById('parametersRemovedStat').textContent = this.formatNumber(
-      this.stats.parametersRemoved
+      this.stats.parametersRemoved,
     );
     document.getElementById('sessionsCleanedStat').textContent = this.formatNumber(
-      this.stats.sessionsCleared
+      this.stats.sessionsCleared,
     );
 
     const activityLog = document.getElementById('activityLog');
@@ -327,7 +347,7 @@ class OptionsManager {
         </div>
         <div class="activity-time">${this.formatTime(cleanup.timestamp)}</div>
       </div>
-    `
+    `,
       )
       .join('');
   }
@@ -344,7 +364,7 @@ class OptionsManager {
   resetRules() {
     if (
       confirm(
-        'Reset all rules to default settings? This will remove all custom rules and re-enable all built-in rules.'
+        'Reset all rules to default settings? This will remove all custom rules and re-enable all built-in rules.',
       )
     ) {
       this.settings.customRules = [];
@@ -550,12 +570,18 @@ class OptionsManager {
     }
 
     // Save merged data
-    await chrome.storage.sync.set({
+    await chrome.storage.local.set({
       customRules: this.settings.customRules,
       whitelist: this.whitelist,
       stats: this.stats,
       recentCleanups: this.recentCleanups,
     });
+    if (chrome.storage.sync) {
+      await chrome.storage.sync.set({
+        customRules: this.settings.customRules,
+        whitelist: this.whitelist,
+      });
+    }
 
     // Update background script with new settings
     await chrome.runtime.sendMessage({
@@ -626,7 +652,7 @@ class OptionsManager {
       const params = new URLSearchParams(urlObj.search);
 
       const allTrackingParams = [...this.builtinRules, ...this.settings.customRules].filter(
-        (rule) => !this.settings.disabledRules.has(rule)
+        (rule) => !this.settings.disabledRules.has(rule),
       );
 
       allTrackingParams.forEach((param) => params.delete(param));

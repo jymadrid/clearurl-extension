@@ -1,5 +1,5 @@
 class ClearURLService {
-  constructor() {
+  constructor({ autoInitialize = true } = {}) {
     this.stats = {
       totalCleaned: 0,
       parametersRemoved: 0,
@@ -21,6 +21,7 @@ class ClearURLService {
     this.clipboardCleaningEnabled = false;
     this.shortUrlExpansionEnabled = false;
     this.lastClipboardContent = '';
+    this.staticRulesetId = 'tracking_rules';
 
     // 性能优化：防抖保存
     this.saveSettingsTimer = null;
@@ -117,7 +118,9 @@ class ClearURLService {
     // 剪贴板监控 alarm 名称
     this.clipboardAlarmName = 'clipboardCheck';
 
-    this.initialize();
+    if (autoInitialize) {
+      this.initialize();
+    }
   }
 
   async initialize() {
@@ -151,7 +154,7 @@ class ClearURLService {
 
   async loadSettings() {
     try {
-      const data = await chrome.storage.local.get([
+      const settingKeys = [
         'stats',
         'whitelist',
         'customRules',
@@ -160,7 +163,10 @@ class ClearURLService {
         'cleaningLog',
         'clipboardCleaningEnabled',
         'shortUrlExpansionEnabled',
-      ]);
+      ];
+      const localData = await chrome.storage.local.get(settingKeys);
+      const syncData = chrome.storage.sync ? await chrome.storage.sync.get(settingKeys) : {};
+      const data = { ...syncData, ...localData };
 
       if (data.stats) {
         this.stats = { ...this.stats, ...data.stats };
@@ -194,11 +200,40 @@ class ClearURLService {
 
   // 性能优化：重建自定义规则的正则表达式
   rebuildCustomRulePatterns() {
-    this.customRulePatterns = this.customRules.map((rule) => new RegExp(`^${rule}$`));
+    this.customRules = this.normalizeCustomRules(this.customRules);
+    this.customRulePatterns = this.customRules.map(
+      (rule) => new RegExp(`^${this.escapeRegExp(rule)}$`),
+    );
     this.allPatterns =
       this.customRulePatterns.length > 0
         ? this.trackingPatterns.concat(this.customRulePatterns)
         : this.trackingPatterns;
+  }
+
+  normalizeCustomRules(rules) {
+    const normalizedRules = new Set();
+
+    for (const rule of Array.isArray(rules) ? rules : []) {
+      const normalizedRule = this.normalizeCustomRule(rule);
+      if (normalizedRule) {
+        normalizedRules.add(normalizedRule);
+      }
+    }
+
+    return Array.from(normalizedRules);
+  }
+
+  normalizeCustomRule(rule) {
+    if (typeof rule !== 'string') {
+      return null;
+    }
+
+    const normalizedRule = rule.trim();
+    return /^[a-zA-Z0-9_-]+$/.test(normalizedRule) ? normalizedRule : null;
+  }
+
+  escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   }
 
   async saveSettings() {
@@ -213,6 +248,15 @@ class ClearURLService {
         clipboardCleaningEnabled: this.clipboardCleaningEnabled,
         shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
       });
+      if (chrome.storage.sync) {
+        await chrome.storage.sync.set({
+          whitelist: Array.from(this.whitelist),
+          customRules: this.customRules,
+          isEnabled: this.isEnabled,
+          clipboardCleaningEnabled: this.clipboardCleaningEnabled,
+          shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
+        });
+      }
     } catch (error) {
       console.error('Failed to save settings:', error);
     }
@@ -240,14 +284,11 @@ class ClearURLService {
       const existingRules = await chrome.declarativeNetRequest.getDynamicRules();
       const removeRuleIds = existingRules.map((rule) => rule.id);
 
-      if (removeRuleIds.length > 0) {
-        await chrome.declarativeNetRequest.updateDynamicRules({
-          removeRuleIds: removeRuleIds,
-        });
-      }
-
       // 2. 如果扩展被禁用，不添加任何规则
       if (!this.isEnabled) {
+        await this.setStaticRulesetEnabled(false);
+        await this.updateDynamicRules({ removeRuleIds });
+        console.log('Updated rules: extension disabled');
         return;
       }
 
@@ -313,16 +354,55 @@ class ClearURLService {
         newRules.push(customRule);
       }
 
-      // 6. 应用所有新规则
-      if (newRules.length > 0) {
-        await chrome.declarativeNetRequest.updateDynamicRules({
-          addRules: newRules,
-        });
+      if (newRules.length === 0) {
+        await this.updateDynamicRules({ removeRuleIds });
+        await this.setStaticRulesetEnabled(this.whitelist.size === 0);
+        console.warn(
+          this.whitelist.size === 0
+            ? 'Updated rules: using static ruleset fallback'
+            : 'Updated rules: static fallback disabled because whitelist is active',
+        );
+        return;
       }
+
+      // 6. 应用所有新规则，成功后禁用静态 ruleset，避免绕过白名单/开关
+      await this.updateDynamicRules({ removeRuleIds, addRules: newRules });
+      await this.setStaticRulesetEnabled(false);
 
       console.log(`Updated rules: ${newRules.length} rules applied`);
     } catch (error) {
       console.error('Failed to update rules:', error);
+    }
+  }
+
+  async updateDynamicRules({ removeRuleIds = [], addRules = [] }) {
+    const updateOptions = {};
+
+    if (removeRuleIds.length > 0) {
+      updateOptions.removeRuleIds = removeRuleIds;
+    }
+    if (addRules.length > 0) {
+      updateOptions.addRules = addRules;
+    }
+
+    if (Object.keys(updateOptions).length > 0) {
+      await chrome.declarativeNetRequest.updateDynamicRules(updateOptions);
+    }
+  }
+
+  async setStaticRulesetEnabled(enabled) {
+    if (!chrome.declarativeNetRequest.updateEnabledRulesets) {
+      return;
+    }
+
+    try {
+      await chrome.declarativeNetRequest.updateEnabledRulesets(
+        enabled
+          ? { enableRulesetIds: [this.staticRulesetId] }
+          : { disableRulesetIds: [this.staticRulesetId] },
+      );
+    } catch (error) {
+      console.warn('Failed to update static ruleset state:', error);
     }
   }
 
@@ -374,7 +454,7 @@ class ClearURLService {
       this.stats.totalCleaned++;
       this.stats.parametersRemoved += this.countRemovedParameters(
         originalParams,
-        new URL(cleanedUrl).search
+        new URL(cleanedUrl).search,
       );
 
       const processingTime = performance.now() - startTime;
@@ -391,27 +471,30 @@ class ClearURLService {
   cleanUrl(url) {
     try {
       const urlObj = new URL(url);
-      const params = new URLSearchParams(urlObj.search);
+      const params = urlObj.searchParams;
+      const paramsToRemove = new Set();
 
       for (const [key] of params) {
-        const shouldRemove = this.allPatterns.some((pattern) => {
-          if (pattern instanceof RegExp) {
-            return pattern.test(key);
-          }
-          return key === pattern;
-        });
-
-        if (shouldRemove) {
-          params.delete(key);
+        if (this.shouldRemoveParameter(key)) {
+          paramsToRemove.add(key);
         }
       }
 
-      urlObj.search = params.toString();
+      paramsToRemove.forEach((key) => params.delete(key));
       return urlObj.toString();
     } catch (error) {
       console.error('Error cleaning URL:', error);
       return url;
     }
+  }
+
+  shouldRemoveParameter(key) {
+    return this.allPatterns.some((pattern) => {
+      if (pattern instanceof RegExp) {
+        return pattern.test(key);
+      }
+      return key === pattern;
+    });
   }
 
   countRemovedParameters(original, cleaned) {
@@ -428,7 +511,7 @@ class ClearURLService {
       timestamp: Date.now(),
       parametersRemoved: this.countRemovedParameters(
         new URL(originalUrl).search,
-        new URL(cleanedUrl).search
+        new URL(cleanedUrl).search,
       ),
     };
 
@@ -500,132 +583,157 @@ class ClearURLService {
 
   async handleMessage(message, sender, sendResponse) {
     switch (message.action) {
-      case 'getStats':
-        sendResponse({
-          stats: this.stats,
-          performanceStats: this.performanceStats,
-          recentCleanups: this.recentCleanups,
-          isEnabled: this.isEnabled,
-        });
-        break;
+    case 'getStats':
+      sendResponse({
+        stats: this.stats,
+        performanceStats: this.performanceStats,
+        recentCleanups: this.recentCleanups,
+        isEnabled: this.isEnabled,
+      });
+      break;
 
-      case 'toggleEnabled':
-        this.isEnabled = !this.isEnabled;
+    case 'toggleEnabled':
+      this.isEnabled = !this.isEnabled;
+      await this.updateRules();
+      await this.saveSettings();
+      this.updateBadge();
+      sendResponse({ isEnabled: this.isEnabled });
+      break;
+
+    case 'addToWhitelist':
+      if (message.hostname) {
+        this.whitelist.add(message.hostname);
         await this.updateRules();
         await this.saveSettings();
-        this.updateBadge();
-        sendResponse({ isEnabled: this.isEnabled });
-        break;
+      }
+      sendResponse({ success: true });
+      break;
 
-      case 'addToWhitelist':
-        if (message.hostname) {
-          this.whitelist.add(message.hostname);
-          await this.updateRules();
-          await this.saveSettings();
+    case 'removeFromWhitelist':
+      if (message.hostname) {
+        this.whitelist.delete(message.hostname);
+        await this.updateRules();
+        await this.saveSettings();
+      }
+      sendResponse({ success: true });
+      break;
+
+    case 'getWhitelist':
+      sendResponse({ whitelist: Array.from(this.whitelist) });
+      break;
+
+    case 'addCustomRule':
+      {
+        const customRule = this.normalizeCustomRule(message.rule);
+        if (!customRule) {
+          sendResponse({ success: false, error: 'invalidRule' });
+          break;
         }
-        sendResponse({ success: true });
-        break;
-
-      case 'removeFromWhitelist':
-        if (message.hostname) {
-          this.whitelist.delete(message.hostname);
-          await this.updateRules();
-          await this.saveSettings();
-        }
-        sendResponse({ success: true });
-        break;
-
-      case 'getWhitelist':
-        sendResponse({ whitelist: Array.from(this.whitelist) });
-        break;
-
-      case 'addCustomRule':
-        if (message.rule && !this.customRules.includes(message.rule)) {
-          this.customRules.push(message.rule);
+        if (!this.customRules.includes(customRule)) {
+          this.customRules.push(customRule);
           this.rebuildCustomRulePatterns();
           await this.updateRules();
           await this.saveSettings();
         }
-        sendResponse({ success: true });
-        break;
+      }
+      sendResponse({ success: true });
+      break;
 
-      case 'removeCustomRule':
-        if (message.rule) {
-          this.customRules = this.customRules.filter((r) => r !== message.rule);
+    case 'updateSettings':
+      if (message.settings) {
+        if (typeof message.settings.isEnabled === 'boolean') {
+          this.isEnabled = message.settings.isEnabled;
+        }
+        if (Array.isArray(message.settings.customRules)) {
+          this.customRules = this.normalizeCustomRules(message.settings.customRules);
           this.rebuildCustomRulePatterns();
-          await this.updateRules();
-          await this.saveSettings();
         }
-        sendResponse({ success: true });
-        break;
-
-      case 'getCustomRules':
-        sendResponse({ customRules: this.customRules });
-        break;
-
-      case 'clearStats':
-        this.stats = { totalCleaned: 0, parametersRemoved: 0, sessionsCleared: 0 };
-        this.performanceStats = {
-          averageProcessingTime: 0,
-          totalProcessed: 0,
-          memoryUsage: 0,
-          lastCleanup: Date.now(),
-        };
-        this.recentCleanups = [];
-        await this.saveSettings();
-        this.updateBadge();
-        sendResponse({ success: true });
-        break;
-
-      case 'getCleaningLog':
-        sendResponse({ cleaningLog: this.cleaningLog });
-        break;
-
-      case 'clearCleaningLog':
-        this.cleaningLog = [];
-        await this.saveSettings();
-        sendResponse({ success: true });
-        break;
-
-      case 'toggleClipboardCleaning':
-        this.clipboardCleaningEnabled = !this.clipboardCleaningEnabled;
-        // 性能优化：按需启停剪贴板监控
-        if (this.clipboardCleaningEnabled) {
-          this.startClipboardAlarm();
-        } else {
-          this.stopClipboardAlarm();
+        if (Array.isArray(message.settings.whitelist)) {
+          this.whitelist = new Set(message.settings.whitelist);
         }
+        await this.updateRules();
         await this.saveSettings();
-        sendResponse({ enabled: this.clipboardCleaningEnabled });
-        break;
+      }
+      sendResponse({ success: true });
+      break;
 
-      case 'toggleShortUrlExpansion':
-        this.shortUrlExpansionEnabled = !this.shortUrlExpansionEnabled;
+    case 'removeCustomRule':
+      if (message.rule) {
+        this.customRules = this.customRules.filter((r) => r !== message.rule);
+        this.rebuildCustomRulePatterns();
+        await this.updateRules();
         await this.saveSettings();
-        sendResponse({ enabled: this.shortUrlExpansionEnabled });
-        break;
+      }
+      sendResponse({ success: true });
+      break;
 
-      case 'getFeatureStatus':
-        sendResponse({
-          clipboardCleaningEnabled: this.clipboardCleaningEnabled,
-          shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
-        });
-        break;
+    case 'getCustomRules':
+      sendResponse({ customRules: this.customRules });
+      break;
+
+    case 'clearStats':
+      this.stats = { totalCleaned: 0, parametersRemoved: 0, sessionsCleared: 0 };
+      this.performanceStats = {
+        averageProcessingTime: 0,
+        totalProcessed: 0,
+        memoryUsage: 0,
+        lastCleanup: Date.now(),
+      };
+      this.recentCleanups = [];
+      await this.saveSettings();
+      this.updateBadge();
+      sendResponse({ success: true });
+      break;
+
+    case 'getCleaningLog':
+      sendResponse({ cleaningLog: this.cleaningLog });
+      break;
+
+    case 'clearCleaningLog':
+      this.cleaningLog = [];
+      await this.saveSettings();
+      sendResponse({ success: true });
+      break;
+
+    case 'toggleClipboardCleaning':
+      this.clipboardCleaningEnabled = !this.clipboardCleaningEnabled;
+      // 性能优化：按需启停剪贴板监控
+      if (this.clipboardCleaningEnabled) {
+        this.startClipboardAlarm();
+      } else {
+        this.stopClipboardAlarm();
+      }
+      await this.saveSettings();
+      sendResponse({ enabled: this.clipboardCleaningEnabled });
+      break;
+
+    case 'toggleShortUrlExpansion':
+      this.shortUrlExpansionEnabled = !this.shortUrlExpansionEnabled;
+      await this.saveSettings();
+      sendResponse({ enabled: this.shortUrlExpansionEnabled });
+      break;
+
+    case 'getFeatureStatus':
+      sendResponse({
+        clipboardCleaningEnabled: this.clipboardCleaningEnabled,
+        shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
+      });
+      break;
 
       // 性能优化：新增批量获取数据接口，减少消息往返
-      case 'getPopupData':
-        sendResponse({
-          stats: this.stats,
-          performanceStats: this.performanceStats,
-          recentCleanups: this.recentCleanups,
-          isEnabled: this.isEnabled,
-          whitelist: Array.from(this.whitelist),
-          customRules: this.customRules,
-          cleaningLog: this.cleaningLog,
-          clipboardCleaningEnabled: this.clipboardCleaningEnabled,
-          shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
-        });
-        break;
+    case 'getPopupData':
+      sendResponse({
+        stats: this.stats,
+        performanceStats: this.performanceStats,
+        recentCleanups: this.recentCleanups,
+        isEnabled: this.isEnabled,
+        whitelist: Array.from(this.whitelist),
+        customRules: this.customRules,
+        cleaningLog: this.cleaningLog,
+        clipboardCleaningEnabled: this.clipboardCleaningEnabled,
+        shortUrlExpansionEnabled: this.shortUrlExpansionEnabled,
+      });
+      break;
     }
   }
 
@@ -651,8 +759,9 @@ class ClearURLService {
       return;
     }
 
+    const now = Date.now();
     const todayCleanups = this.recentCleanups.filter(
-      (cleanup) => Date.now() - cleanup.timestamp < 24 * 60 * 60 * 1000
+      (cleanup) => now - cleanup.timestamp < 24 * 60 * 60 * 1000,
     ).length;
 
     if (todayCleanups > 0) {
@@ -695,7 +804,7 @@ class ClearURLService {
 
   // 性能优化：剪贴板监控按需启停
   startClipboardAlarm() {
-    chrome.alarms.create(this.clipboardAlarmName, { periodInMinutes: 0.033 });
+    chrome.alarms.create(this.clipboardAlarmName, { periodInMinutes: 0.5 });
   }
 
   stopClipboardAlarm() {
@@ -717,7 +826,30 @@ class ClearURLService {
 
     // 监听设置变化
     chrome.storage.onChanged.addListener((changes, namespace) => {
-      if (namespace === 'local') {
+      if (namespace === 'local' || namespace === 'sync') {
+        let shouldUpdateRules = false;
+
+        if (changes.isEnabled && changes.isEnabled.newValue !== this.isEnabled) {
+          this.isEnabled = changes.isEnabled.newValue !== false;
+          shouldUpdateRules = true;
+        }
+        if (changes.customRules) {
+          const customRules = this.normalizeCustomRules(changes.customRules.newValue);
+          if (!this.arraysEqual(customRules, this.customRules)) {
+            this.customRules = customRules;
+            this.rebuildCustomRulePatterns();
+            shouldUpdateRules = true;
+          }
+        }
+        if (changes.whitelist) {
+          const whitelist = Array.isArray(changes.whitelist.newValue)
+            ? changes.whitelist.newValue
+            : [];
+          if (!this.arraysEqual(whitelist, Array.from(this.whitelist))) {
+            this.whitelist = new Set(whitelist);
+            shouldUpdateRules = true;
+          }
+        }
         if (changes.clipboardCleaningEnabled) {
           this.clipboardCleaningEnabled = changes.clipboardCleaningEnabled.newValue;
           // 性能优化：根据设置变化启停 alarm
@@ -730,8 +862,19 @@ class ClearURLService {
         if (changes.shortUrlExpansionEnabled) {
           this.shortUrlExpansionEnabled = changes.shortUrlExpansionEnabled.newValue;
         }
+        if (shouldUpdateRules) {
+          this.updateRules();
+          this.updateBadge();
+        }
       }
     });
+  }
+
+  arraysEqual(left, right) {
+    if (left.length !== right.length) {
+      return false;
+    }
+    return left.every((value, index) => value === right[index]);
   }
 
   async monitorClipboard() {
@@ -828,7 +971,7 @@ class ClearURLService {
       const hostname = urlObj.hostname.toLowerCase();
 
       return this.shortenerDomains.some(
-        (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
+        (domain) => hostname === domain || hostname.endsWith(`.${domain}`),
       );
     } catch {
       return false;
@@ -877,12 +1020,23 @@ class ClearURLService {
   }
 }
 
-const clearURLService = new ClearURLService();
+const disableAutoStart =
+  (typeof process !== 'undefined' && process.env.NODE_ENV === 'test') ||
+  (typeof globalThis !== 'undefined' && globalThis.__CLEARURL_DISABLE_AUTO_START) ||
+  (typeof window !== 'undefined' && window.__CLEARURL_DISABLE_AUTO_START);
+const shouldAutoStart = !disableAutoStart;
+const clearURLService = shouldAutoStart ? new ClearURLService() : null;
 
-chrome.runtime.onInstalled.addListener(() => {
-  console.log('ClearURL Extension installed');
-});
+if (clearURLService) {
+  chrome.runtime.onInstalled.addListener(() => {
+    console.log('ClearURL Extension installed');
+  });
 
-chrome.runtime.onStartup.addListener(() => {
-  clearURLService.updateBadge();
-});
+  chrome.runtime.onStartup.addListener(() => {
+    clearURLService.updateBadge();
+  });
+}
+
+if (typeof module !== 'undefined') {
+  module.exports = { ClearURLService, clearURLService };
+}

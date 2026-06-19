@@ -141,10 +141,10 @@ class PopupManager {
 
   updateStats() {
     document.getElementById('totalCleaned').textContent = this.formatNumber(
-      this.stats.totalCleaned
+      this.stats.totalCleaned,
     );
     document.getElementById('parametersRemoved').textContent = this.formatNumber(
-      this.stats.parametersRemoved
+      this.stats.parametersRemoved,
     );
   }
 
@@ -165,7 +165,7 @@ class PopupManager {
         <div class="activity-params">${cleanup.parametersRemoved} parameter${cleanup.parametersRemoved !== 1 ? 's' : ''} removed</div>
         <div class="activity-time">${this.formatTime(cleanup.timestamp)}</div>
       </div>
-    `
+    `,
       )
       .join('');
   }
@@ -208,7 +208,7 @@ class PopupManager {
         <span class="list-item-text">${domain}</span>
         <button class="list-item-remove" data-domain="${domain}">删除</button>
       </div>
-    `
+    `,
       )
       .join('');
 
@@ -236,7 +236,7 @@ class PopupManager {
         <span class="list-item-text">${rule}</span>
         <button class="list-item-remove" data-rule="${rule}">删除</button>
       </div>
-    `
+    `,
       )
       .join('');
 
@@ -258,7 +258,7 @@ class PopupManager {
     // 简单的域名验证
     if (
       !/^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/.test(
-        domain
+        domain,
       )
     ) {
       alert('请输入有效的域名');
@@ -460,14 +460,14 @@ class PopupManager {
           log.removedParams.length > 5
             ? `
             ${log.removedParams
-              .slice(0, 5)
-              .map((param) => `<span class="log-item-param-tag">${param}</span>`)
-              .join('')}
+    .slice(0, 5)
+    .map((param) => `<span class="log-item-param-tag">${param}</span>`)
+    .join('')}
             <span class="log-item-param-count">+${log.removedParams.length - 5} more</span>
           `
             : log.removedParams
-                .map((param) => `<span class="log-item-param-tag">${param}</span>`)
-                .join('');
+              .map((param) => `<span class="log-item-param-tag">${param}</span>`)
+              .join('');
 
         return `
           <div class="log-item">

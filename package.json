@@ -5,7 +5,7 @@
   "main": "background.js",
   "scripts": {
     "dev": "web-ext run",
-    "build": "web-ext build",
+    "build": "web-ext build --overwrite-dest",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "jest",
@@ -106,6 +106,7 @@
       "tests",
       "*.md",
       "package*.json",
+      ".ccg",
       ".git*",
       "web-ext-artifacts"
     ]
