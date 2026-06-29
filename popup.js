@@ -161,7 +161,7 @@ class PopupManager {
       .map(
         (cleanup) => `
       <div class="activity-item">
-        <div class="activity-site">${this.truncateUrl(cleanup.hostname)}</div>
+        <div class="activity-site">${this.escapeHtml(this.truncateUrl(cleanup.hostname))}</div>
         <div class="activity-params">${cleanup.parametersRemoved} parameter${cleanup.parametersRemoved !== 1 ? 's' : ''} removed</div>
         <div class="activity-time">${this.formatTime(cleanup.timestamp)}</div>
       </div>
@@ -205,8 +205,8 @@ class PopupManager {
       .map(
         (domain) => `
       <div class="list-item">
-        <span class="list-item-text">${domain}</span>
-        <button class="list-item-remove" data-domain="${domain}">删除</button>
+        <span class="list-item-text">${this.escapeHtml(domain)}</span>
+        <button class="list-item-remove" data-domain="${this.escapeHtml(domain)}">删除</button>
       </div>
     `,
       )
@@ -233,8 +233,8 @@ class PopupManager {
       .map(
         (rule) => `
       <div class="list-item">
-        <span class="list-item-text">${rule}</span>
-        <button class="list-item-remove" data-rule="${rule}">删除</button>
+        <span class="list-item-text">${this.escapeHtml(rule)}</span>
+        <button class="list-item-remove" data-rule="${this.escapeHtml(rule)}">删除</button>
       </div>
     `,
       )
@@ -436,6 +436,12 @@ class PopupManager {
     }
   }
 
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
   truncateUrl(url) {
     if (url.length > 25) {
       return `${url.substring(0, 22)}...`;
@@ -461,22 +467,22 @@ class PopupManager {
             ? `
             ${log.removedParams
     .slice(0, 5)
-    .map((param) => `<span class="log-item-param-tag">${param}</span>`)
+    .map((param) => `<span class="log-item-param-tag">${this.escapeHtml(param)}</span>`)
     .join('')}
             <span class="log-item-param-count">+${log.removedParams.length - 5} more</span>
           `
             : log.removedParams
-              .map((param) => `<span class="log-item-param-tag">${param}</span>`)
+              .map((param) => `<span class="log-item-param-tag">${this.escapeHtml(param)}</span>`)
               .join('');
 
         return `
           <div class="log-item">
             <div class="log-item-header">
-              <img src="${log.favicon}" class="log-item-favicon" onerror="this.style.display='none'">
-              <span class="log-item-domain">${log.domain}</span>
+              <img src="${this.escapeHtml(log.favicon)}" class="log-item-favicon" onerror="this.style.display='none'">
+              <span class="log-item-domain">${this.escapeHtml(log.domain)}</span>
               <span class="log-item-time">${this.formatTime(log.timestamp)}</span>
             </div>
-            <div class="log-item-url" title="${log.originalUrl}">${log.originalUrl}</div>
+            <div class="log-item-url" title="${this.escapeHtml(log.originalUrl)}">${this.escapeHtml(log.originalUrl)}</div>
             <div class="log-item-params">
               ${paramsHtml}
             </div>

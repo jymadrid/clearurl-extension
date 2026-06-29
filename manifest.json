@@ -9,7 +9,10 @@
     "storage",
     "activeTab",
     "webNavigation",
-    "alarms",
+    "alarms"
+  ],
+
+  "optional_permissions": [
     "clipboardRead",
     "clipboardWrite",
     "notifications"

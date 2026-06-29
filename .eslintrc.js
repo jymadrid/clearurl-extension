@@ -6,7 +6,7 @@ module.exports = {
     node: true,
     jest: true,
   },
-  extends: ['eslint:recommended'],
+  extends: ['eslint:recommended', 'prettier'],
   parserOptions: {
     ecmaVersion: 2022,
     sourceType: 'module',
@@ -44,24 +44,10 @@ module.exports = {
     'prefer-const': 'error',
     'prefer-arrow-callback': 'error',
 
-    // Code style
-    indent: ['error', 2],
-    'linebreak-style': ['error', 'unix'],
-    quotes: ['error', 'single'],
-    semi: ['error', 'always'],
-    'comma-dangle': ['error', 'always-multiline'],
-    'object-curly-spacing': ['error', 'always'],
-    'array-bracket-spacing': ['error', 'never'],
-    'space-before-blocks': 'error',
-    'keyword-spacing': 'error',
-    'space-infix-ops': 'error',
-
     // Modern JavaScript
-    'arrow-spacing': 'error',
     'no-duplicate-imports': 'error',
     'no-useless-constructor': 'error',
     'prefer-template': 'error',
-    'template-curly-spacing': 'error',
   },
   overrides: [
     {

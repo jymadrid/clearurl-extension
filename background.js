@@ -696,8 +696,14 @@ class ClearURLService {
       break;
 
     case 'toggleClipboardCleaning':
+      if (!this.clipboardCleaningEnabled) {
+        const granted = await this.requestPermissions(['clipboardRead', 'clipboardWrite', 'notifications']);
+        if (!granted) {
+          sendResponse({ enabled: false, error: 'permissionDenied' });
+          break;
+        }
+      }
       this.clipboardCleaningEnabled = !this.clipboardCleaningEnabled;
-      // 性能优化：按需启停剪贴板监控
       if (this.clipboardCleaningEnabled) {
         this.startClipboardAlarm();
       } else {
@@ -875,6 +881,14 @@ class ClearURLService {
       return false;
     }
     return left.every((value, index) => value === right[index]);
+  }
+
+  async requestPermissions(permissions) {
+    try {
+      return await chrome.permissions.request({ permissions });
+    } catch {
+      return false;
+    }
   }
 
   async monitorClipboard() {

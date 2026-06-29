@@ -271,14 +271,17 @@ class OptionsManager {
       .map(
         (rule) => `
       <div class="rule-item">
-        <span>${rule}</span>
-        <input type="checkbox" class="rule-toggle" 
-               ${!this.settings.disabledRules.has(rule) ? 'checked' : ''} 
-               onchange="optionsManager.toggleRule('${rule}', this.checked)">
+        <span>${this.escapeHtml(rule)}</span>
+        <input type="checkbox" class="rule-toggle" data-rule="${this.escapeHtml(rule)}"
+               ${!this.settings.disabledRules.has(rule) ? 'checked' : ''}>
       </div>
     `,
       )
       .join('');
+
+    container.querySelectorAll('.rule-toggle').forEach((input) => {
+      input.addEventListener('change', () => this.toggleRule(input.dataset.rule, input.checked));
+    });
   }
 
   renderCustomRules() {
@@ -292,12 +295,16 @@ class OptionsManager {
       .map(
         (rule) => `
       <div class="rule-item">
-        <span>${rule}</span>
-        <button class="rule-remove" onclick="optionsManager.removeCustomRule('${rule}')">&times;</button>
+        <span>${this.escapeHtml(rule)}</span>
+        <button class="rule-remove" data-rule="${this.escapeHtml(rule)}">&times;</button>
       </div>
     `,
       )
       .join('');
+
+    container.querySelectorAll('.rule-remove').forEach((btn) => {
+      btn.addEventListener('click', () => this.removeCustomRule(btn.dataset.rule));
+    });
   }
 
   renderWhitelist() {
@@ -311,12 +318,16 @@ class OptionsManager {
       .map(
         (domain) => `
       <div class="whitelist-item">
-        <span class="whitelist-domain">${domain}</span>
-        <button class="whitelist-remove" onclick="optionsManager.removeWhitelistItem('${domain}')">Remove</button>
+        <span class="whitelist-domain">${this.escapeHtml(domain)}</span>
+        <button class="whitelist-remove" data-domain="${this.escapeHtml(domain)}">Remove</button>
       </div>
     `,
       )
       .join('');
+
+    container.querySelectorAll('.whitelist-remove').forEach((btn) => {
+      btn.addEventListener('click', () => this.removeWhitelistItem(btn.dataset.domain));
+    });
   }
 
   renderStats() {
@@ -621,8 +632,8 @@ class OptionsManager {
       let resultHTML = '<div class="test-result">';
       resultHTML += '<h4>Test Results</h4>';
       resultHTML += '<div class="url-comparison">';
-      resultHTML += `<div class="original-url"><strong>Original URL:</strong><br><code>${url}</code></div>`;
-      resultHTML += `<div class="cleaned-url"><strong>Cleaned URL:</strong><br><code>${cleanedUrl}</code></div>`;
+      resultHTML += `<div class="original-url"><strong>Original URL:</strong><br><code>${this.escapeHtml(url)}</code></div>`;
+      resultHTML += `<div class="cleaned-url"><strong>Cleaned URL:</strong><br><code>${this.escapeHtml(cleanedUrl)}</code></div>`;
       resultHTML += '</div>';
 
       if (removedParams.length > 0) {
@@ -630,7 +641,7 @@ class OptionsManager {
         resultHTML += `<h5>Removed Parameters (${removedParams.length}):</h5>`;
         resultHTML += '<ul>';
         removedParams.forEach((param) => {
-          resultHTML += `<li><code>${param}</code></li>`;
+          resultHTML += `<li><code>${this.escapeHtml(param)}</code></li>`;
         });
         resultHTML += '</ul>';
         resultHTML += '</div>';
@@ -642,7 +653,7 @@ class OptionsManager {
       resultHTML += '</div>';
       resultDiv.innerHTML = resultHTML;
     } catch (error) {
-      resultDiv.innerHTML = `<p class="error">Invalid URL format: ${error.message}</p>`;
+      resultDiv.innerHTML = `<p class="error">Invalid URL format: ${this.escapeHtml(error.message)}</p>`;
     }
   }
 

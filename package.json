@@ -66,38 +66,6 @@
       "!tests/**"
     ]
   },
-  "eslintConfig": {
-    "extends": [
-      "eslint:recommended",
-      "plugin:prettier/recommended"
-    ],
-    "env": {
-      "browser": true,
-      "es2022": true,
-      "webextensions": true,
-      "node": true
-    },
-    "globals": {
-      "chrome": "readonly"
-    },
-    "parserOptions": {
-      "ecmaVersion": 2022,
-      "sourceType": "module"
-    },
-    "rules": {
-      "no-console": "warn",
-      "no-unused-vars": "error",
-      "prefer-const": "error",
-      "no-var": "error"
-    }
-  },
-  "prettier": {
-    "semi": true,
-    "trailingComma": "es5",
-    "singleQuote": true,
-    "printWidth": 100,
-    "tabWidth": 2
-  },
   "webExt": {
     "sourceDir": ".",
     "artifactsDir": "web-ext-artifacts",
